@@ -2,58 +2,104 @@
 using namespace std;
 
 /*
-	DB °¡°İ ¼øÀ¸·Î Á¤·Ä -> ¿ëµµ·Î ÇÊÅÍ¸µ -> ³²Àº ¸®½ºÆ®¿¡¼­ input°¡°İ°úÀÇ Â÷ÀÌ ¼¼ÆÃ
-	-> Àı´ë°ª ¼øÀ¸·Î Á¤·Ä(¾Ë°í¸®Áò ´Ş¸®) (ÀÔ·Â¹ŞÀº °¡°İ´ë¿¡¼­ Ãâ·ÂÇÏ±â À§ÇÔ)
-	-> 0À» ±âÁØÀ¸·Î °¡°İÂ÷ÀÇ Àı´ë°ªÀÌ ÀÛÀº °Í Áß ½Ñ°Å 5°³, ºñ½Ñ°Å 2°³ Ãâ·Â
+	DB ê°€ê²© ìˆœìœ¼ë¡œ ì •ë ¬ -> ìš©ë„ë¡œ í•„í„°ë§ -> ë‚¨ì€ ë¦¬ìŠ¤íŠ¸ì—ì„œ inputê°€ê²©ê³¼ì˜ ì°¨ì´ ì„¸íŒ…
+	-> ì ˆëŒ€ê°’ ìˆœìœ¼ë¡œ ì •ë ¬(ì•Œê³ ë¦¬ì¦˜ ë‹¬ë¦¬) (ì…ë ¥ë°›ì€ ê°€ê²©ëŒ€ì—ì„œ ì¶œë ¥í•˜ê¸° ìœ„í•¨)
+	-> 0ì„ ê¸°ì¤€ìœ¼ë¡œ ê°€ê²©ì°¨ì˜ ì ˆëŒ€ê°’ì´ ì‘ì€ ê²ƒ ì¤‘ ì‹¼ê±° 5ê°œ, ë¹„ì‹¼ê±° 2ê°œ ì¶œë ¥
 */
 
-class Notebook {
+class Laptop {
 public:
-	string name;
+	string model;
 	int price;
-	int cpu;
+	string cpu;
 	int ram;
 	int ssd;
 	double weight;
-	bool gpu; // ³»Àå : 0, ¿ÜÀå : 1
-	// È­¸éÅ©±â 
+	bool gpu; // ë‚´ì¥ : 0, ì™¸ì¥ : 1
+	double monitor;
 };
+
+
+void SelectType(Laptop cams[], Laptop selectCams[], int type, int n) { // n = ë…¸íŠ¸ë¶ ìˆ˜ 
+	int idx = 0;
+	switch (type) {
+	case 1:	// ë¬¸ì„œì‘ì—…ìš© 
+		for (int i = 0; i < n; i++) {
+			if (cams[i].gpu == 0 && cams[i].ram <= 8 && cams[i].ssd <= 256 && cams[i].weight < 1200)
+				selectCams[idx++] = cams[i];
+		}
+	case 2: // ê°œë°œìš©
+		for (int i = 0; i < n; i++) {
+			if (cams[i].gpu == 0 && cams[i].ram <= 16 && cams[i].ssd < 1000 && 1200 < cams[i].weight < 2200)
+				selectCams[idx++] = cams[i];
+		}
+	case 3: // ê²Œì´ë° ìš© 
+		for (int i = 0; i < n; i++) {
+			if (cams[i].gpu == 1 && 16 <= cams[i].ram && 512 <= cams[i].ssd)
+				selectCams[idx++] = cams[i];
+		}
+	}
+}
 
 int main() {
 
-	// ¸ğµ¨¸í, °¡°İ, cpu, ram, ssd, ¹«°Ô, È­¸éÅ©±â, gpu(³»Àå/¿ÜÀå)
-	// csv ÆÄÀÏ Çü½Ä 
-
-	Notebook cams[1200];
-	Notebook selectCams[10]; // ¿ëµµ·Î ÇÊÅÍ¸µ µÈ ³ëÆ®ºÏ  
+	Laptop cams[1000];
+	Laptop selectCams[100]; // ìš©ë„ë¡œ í•„í„°ë§ ëœ ë…¸íŠ¸ë¶  
 	int wishPrice; 
+	int type;
 
-	// cams¿¡ µ¥ÀÌÅÍ ÀúÀå 
+	// camsì— ë°ì´í„° ì €ì¥ 
 
 
-	// °¡°İ ÀÔ·Â¹Ş±â 
-	cout << "¿øÇÏ´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+	// ìš©ë„ì™€ ì„ í˜¸ ê°€ê²© ì…ë ¥ë°›ê¸° 
+	cout << "ì›í•˜ì‹œëŠ” ë…¸íŠ¸ë¶ì˜ ìš©ë„ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”" << endl << "1. ë¬¸ì„œì‘ì—…ìš© 2. ê°œë°œìš© 3. ê²Œì´ë°ìš©" << endl;
+	cin >> type;
+	cout << "ì›í•˜ëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : ";
 	cin >> wishPrice;
 
-	// °¡°İ¼øÀ¸·Î Á¤·Ä : ÄüÁ¤·Ä ÀÌ¿ë (µ¥ÀÌÅÍ ¾çÀÌ ¸¹À¸¹Ç·Î) 
+	// wishPrice ì˜ˆì™¸ì²˜ë¦¬ 
+
+
 	
-	// ¿ëµµ·Î ÇÊÅÍ¸µ : 
+	// ìš©ë„ë¡œ í•„í„°ë§ 
+	SelectType(cams, selectCams, type, 1000);
 	
 	 
-	// ÇÊÅÍ¸µ µÈ ³ëÆ®ºÏµéÀÇ °¡°İ°ú ¿øÇÏ´Â °¡°İ´ë ºñ±³
-	for (int i = 0; i < 10; i++) { // 10 : ÇÊÅÍ¸µ µÈ ³ëÆ®ºÏ ¼ö 
+	// í•„í„°ë§ ëœ ë…¸íŠ¸ë¶ë“¤ì˜ ê°€ê²©ê³¼ ì›í•˜ëŠ” ê°€ê²©ëŒ€ ë¹„êµ
+	for (int i = 0; i < 100; i++) { // 10 : í•„í„°ë§ ëœ ë…¸íŠ¸ë¶ ìˆ˜ 
 		selectCams[i].price = wishPrice - selectCams[i].price;
 	}
 	
-	// ÇÊÅÍ¸µ µÈ ³ëÆ®ºÏµéÀ» °¡°İ ¼øÀ¸·Î Á¤·Ä : ÈüÀÌµç ¹¹µç ³»°¡ Á¤·Ä 
+	// í•„í„°ë§ ëœ ë…¸íŠ¸ë¶ë“¤ì„ ê°€ê²© ìˆœìœ¼ë¡œ ì •ë ¬
 
 
-	// Ãâ·Â 
-	cout << "³ëÆ®ºÏ ÃßÃµ ¸®½ºÆ®" << endl;
-	cout << "------------------" << endl;
+
+	// ì¶œë ¥ 
+	cout << "            ë…¸íŠ¸ë¶ ì¶”ì²œ ë¦¬ìŠ¤íŠ¸           " << endl;
+	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < 10; i++) {
-		cout << "¸ğµ¨¸í : " << selectCams[i].name << ", °¡°İ : " << selectCams[i].price;
+		cout << "Model : " << selectCams[i].model
+			<< ", Price : " << selectCams[i].price
+			<< ", CPU : " << selectCams[i].cpu
+			<< ", RAM : " << selectCams[i].ram << "GB"
+			<< ", SSD : " << selectCams[i].price << "ì›"
+			<< ", Weight : " << selectCams[i].price << "g"
+			<< ", Monitor : " << selectCams[i].weight << "ì¸ì¹˜"
+			<< ", GPU : ";
+		if (selectCams[i].gpu == 0) cout << "ë‚´ì¥";
+		else cout << "ì™¸ì¥";
 	}
-	
-
 }
+
+/*
+	gpu , ram , ssd, cpu / weight, monitor
+	ram : 4, 8, 16, 32
+	ssd : 128, 256, 512, 1000, 2000, 4000,
+	cpu : ì˜ëª°ë¼ì„œ pass
+	weight : < 1.2 / 1.2 < 2.2 / 2.2~
+	monitor : 14, 15.. ë³´ë¥˜
+
+	ì‚¬ë¬´ìš© : gpu = 0. ram <=8 , ssd <= 256, weight < 1.2
+	ê°œë°œìš© : gpu = 0, ram <=16, ssd <1000, 1.2< weight < 2.2
+	ê²Œì´ë° ìš© : gpu = 1, 16<= ram <= 32 , ssd >= 512 weightëŠ” ìƒê´€ x
+*/
