@@ -1,10 +1,9 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
 /*
-	DB 가격 순으로 정렬 -> 용도로 필터링 -> 남은 리스트에서 input가격과의 차이 세팅
-	-> 절대값 순으로 정렬(알고리즘 달리) (입력받은 가격대에서 출력하기 위함)
-	-> 0을 기준으로 가격차의 절대값이 작은 것 중 싼거 5개, 비싼거 2개 출력
+	time, 비교횟수 저장하기 
 */
 
 class Laptop {
@@ -14,92 +13,134 @@ public:
 	string cpu;
 	int ram;
 	int ssd;
-	double weight;
+	int weight;
 	bool gpu; // 내장 : 0, 외장 : 1
 	double monitor;
 };
 
+int whatIndex(vector<Laptop> mList, int price)
+{
+	// 이진나무, 2-3-4나무, 흑적나무
+	// 이진 : 승혁, 2-3-4나무 : 찬호, 흑적나무 : 지현 
 
-void SelectType(Laptop cams[], Laptop selectCams[], int type, int n) { // n = 노트북 수 
-	int idx = 0;
-	switch (type) {
-	case 1:	// 문서작업용 
-		for (int i = 0; i < n; i++) {
-			if (cams[i].gpu == 0 && cams[i].ram <= 8 && cams[i].ssd <= 256 && cams[i].weight < 1200)
-				selectCams[idx++] = cams[i];
+	int index = 0;
+	// 탐색 알고리즘으로 입력된 금액보다 높은 가격이 나오는 첫 index
+	return index;
+}
+
+void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
+{
+	
+
+	switch (type)
+	{
+	case 0:// weight <= 1.3, 모든 cpu 타입 허용, 내장
+		for (int i = 0; i < n; i++)
+		{
+			if ((list[i].weight <= 1300) &&
+				(list[i].gpu == 0))
+			{
+				mList.push_back(list[i]);
+			}
 		}
-	case 2: // 개발용
-		for (int i = 0; i < n; i++) {
-			if (cams[i].gpu == 0 && cams[i].ram <= 16 && cams[i].ssd < 1000 && 1200 < cams[i].weight < 2200)
-				selectCams[idx++] = cams[i];
+		break;
+	case 1:// weight <= 2.5, (3, 5, 7, 9) 허용, 내장, ssd 128 <
+		for (int i = 0; i < n; i++)
+		{
+			if ((list[i].weight <= 2500) &&
+				(list[i].gpu == 0) &&
+				(list[i].cpu.at(0) == 'i') &&
+				(list[i].ssd > 128))
+			{
+				mList.push_back(list[i]);
+			}
 		}
-	case 3: // 게이밍 용 
-		for (int i = 0; i < n; i++) {
-			if (cams[i].gpu == 1 && 16 <= cams[i].ram && 512 <= cams[i].ssd)
-				selectCams[idx++] = cams[i];
+		break;
+	case 2:// weight 제한없음, (7, 9) 허용, 외장, ssd 256 <
+		for (int i = 0; i < n; i++)
+		{
+			if ((list[i].gpu == 1) &&
+				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
+				(list[i].ssd > 256) && list[i].monitor > 15)
+			{
+				mList.push_back(list[i]);
+			}
 		}
+		break;
 	}
 }
 
+
 int main() {
-
-	Laptop cams[1000];
-	Laptop selectCams[100]; // 용도로 필터링 된 노트북  
-	int wishPrice; 
+ 
+	// file 불러와서 리스트에 저장
+	Laptop list[1000];
+	vector<Laptop> mList;
+	int n = 1000;
 	int type;
+	int wishPrice;
 
-	// cams에 데이터 저장 
+	int move = 0; int compare =0 ; // -> 자료 이동, 가격 비교 변수 
 
 
 	// 용도와 선호 가격 입력받기 
-	cout << "원하시는 노트북의 용도를 입력해주세요" << endl << "1. 문서작업용 2. 개발용 3. 게이밍용" << endl;
+	cout << "원하시는 노트북 타입을 입력해주세요.\n"
+		<< "0.사무용  1.개발용   2.게이밍용";
 	cin >> type;
-	cout << "원하는 가격을 입력해주세요(원 단위) : ";
+
+	// 용도로 필터링 
+	makeList(list, mList, type, n);
+
+	cout << "원하시는 가격을 입력해주세요(원 단위) : ";
 	cin >> wishPrice;
 
-	// wishPrice 예외처리 
+	// 너무 낮은 금액 (출력할 노트북이 없을 경우) 예외 처리
 
 
+
+	// 가격 순 재정렬 알고리즘
+	// -> 각자 heap, quick, merge
+
+	// heap : 승혁, quick : 찬호, merge : 지현 -> 각자 확장 
+
+
+
+	// 비슷한 가격대 처음 나오는 인덱스 
+	int idx = whatIndex(mList,wishPrice);
 	
-	// 용도로 필터링 
-	SelectType(cams, selectCams, type, 1000);
-	
-	 
-	// 필터링 된 노트북들의 가격과 원하는 가격대 비교
-	for (int i = 0; i < 100; i++) { // 10 : 필터링 된 노트북 수 
-		selectCams[i].price = wishPrice - selectCams[i].price;
+	Laptop coutList[7];
+
+	for (int i = 0; i < 7; i++)
+	{ // index가 최소치이거나 최대치에 근접한 경우 예외 처리 필요
+		coutList[i] = mList[idx - 5];
+		idx++;
 	}
-	
-	// 필터링 된 노트북들을 가격 순으로 정렬
 
 
+	// 탐색함수, 정렬함수 시간, 자료이동 횟수, 비교 횟수 비교 출력 
+	// -> 다음에 정하기 
 
-	// 출력 
+
+	// 출력
 	cout << "            노트북 추천 리스트           " << endl;
 	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < 10; i++) {
-		cout << "Model : " << selectCams[i].model
-			<< ", Price : " << selectCams[i].price
-			<< ", CPU : " << selectCams[i].cpu
-			<< ", RAM : " << selectCams[i].ram << "GB"
-			<< ", SSD : " << selectCams[i].price << "원"
-			<< ", Weight : " << selectCams[i].price << "g"
-			<< ", Monitor : " << selectCams[i].weight << "인치"
+		cout << "Model : " << coutList[i].model
+			<< ", Price : " << coutList[i].price
+			<< ", CPU : " << coutList[i].cpu
+			<< ", RAM : " << coutList[i].ram << "GB";
+
+		if (coutList[i].ssd >= 1000) cout << ", SSD : " << coutList[i].ssd << "TB";
+		else cout << ", SSD : " << coutList[i].ssd << "GB";
+
+		if (coutList[i].weight >= 1000) cout << ", Weight : " << coutList[i].weight << "g";
+		else cout << ", Weight : " << (double)(coutList[i].weight) / 1000 << "Kg ";
+
+		cout << ", Monitor : " << coutList[i].weight << "인치"
 			<< ", GPU : ";
-		if (selectCams[i].gpu == 0) cout << "내장";
+		if (coutList[i].gpu == 0) cout << "내장";
 		else cout << "외장";
 	}
+
+	return 0;
 }
-
-/*
-	gpu , ram , ssd, cpu / weight, monitor
-	ram : 4, 8, 16, 32
-	ssd : 128, 256, 512, 1000, 2000, 4000,
-	cpu : 잘몰라서 pass
-	weight : < 1.2 / 1.2 < 2.2 / 2.2~
-	monitor : 14, 15.. 보류
-
-	사무용 : gpu = 0. ram <=8 , ssd <= 256, weight < 1.2
-	개발용 : gpu = 0, ram <=16, ssd <1000, 1.2< weight < 2.2
-	게이밍 용 : gpu = 1, 16<= ram <= 32 , ssd >= 512 weight는 상관 x
-*/
