@@ -5,7 +5,7 @@
 using namespace std;
 
 /*
-	time, ºñ±³È½¼ö ÀúÀåÇÏ±â
+	time, ë¹„êµíšŸìˆ˜ ì €ì¥í•˜ê¸°
 */
 
 class Laptop {
@@ -16,7 +16,7 @@ public:
 	int ram;
 	int ssd;
 	int weight;
-	bool gpu; // ³»Àå : 0, ¿ÜÀå : 1
+	bool gpu; // ë‚´ì¥ : 0, ì™¸ì¥ : 1
 	double monitor;
 
 	Laptop() {
@@ -30,6 +30,42 @@ public:
 		this->monitor = 0;
 	}
 };
+
+void swap(Laptop a[], int i, int j) {
+	Laptop temp;
+	temp = a[j]; a[j] = a[i]; a[i] = temp;
+}
+
+void MakeHeap(Laptop a[], int Root, int LastNode) {
+	int Parent, LeftSon, RightSon, Son; Laptop RootValue;
+	Parent = Root;
+	RootValue = a[Root];
+	LeftSon = 2 * Parent + 1;
+	RightSon = LeftSon + 1;
+	while (LeftSon < LastNode) {
+		if (RightSon <= LastNode && a[LeftSon].price < a[RightSon].price) {
+			Son = RightSon;
+		}
+		else
+		{
+			Son = LeftSon;
+		}
+		if (RootValue.price < a[Son].price) {
+			a[Parent] = a[Son];
+			Parent = Son;
+			LeftSon = Parent * 2 + 1;
+			RightSon = LeftSon + 1;
+		}
+		else break;
+	}
+	a[Parent] = RootValue;
+}
+
+void heapsort(Laptop a[], int N) {
+	int i;
+	for (i = N / 2; i >= 1; i--) { MakeHeap(a, i - 1, N - 1); }
+	for (i = N - 1; i >= 1; i--) { swap(a, 0, i); MakeHeap(a, 0, i - 1); }
+}
 
 void makeLaptopArr(Laptop list[], string fileName) {
 	int position = 0; // Column number
@@ -61,8 +97,8 @@ void makeLaptopArr(Laptop list[], string fileName) {
 			else if (position == 5) list[aggIdx].weight = stoi(str);
 			else if (position == 6) list[aggIdx].monitor = stod(str);
 			else if (position == 7) {
-				if (str == "³»Àå") list[aggIdx].gpu = 0;
-				else if (str == "¿ÜÀå") list[aggIdx].gpu = 1;
+				if (str == "ë‚´ì¥") list[aggIdx].gpu = 0;
+				else if (str == "ì™¸ì¥") list[aggIdx].gpu = 1;
 			}
 			position++;
 		}
@@ -75,21 +111,29 @@ void makeLaptopArr(Laptop list[], string fileName) {
 
 int whatIndex(vector<Laptop> mList, int price)
 {
-	// ÀÌÁø³ª¹«, 2-3-4³ª¹«, ÈæÀû³ª¹«
-	// ÀÌÁø : ½ÂÇõ, 2-3-4³ª¹« : ÂùÈ£, ÈæÀû³ª¹« : ÁöÇö 
+	int start = 0;
+	int end = mList.size() - 1;
 
-	int index = 0;
-	// Å½»ö ¾Ë°í¸®ÁòÀ¸·Î ÀÔ·ÂµÈ ±İ¾×º¸´Ù ³ôÀº °¡°İÀÌ ³ª¿À´Â Ã¹ index
-	return index;
+	while (start <= end)
+	{
+		int mid = (start + end) / 2;
+
+		if (start + 1 == end) // ì¢€ ë” ëª…í™•í•œ ì¡°ê±´ë¬¸ í•„ìš”
+			return end;
+		else if (price == mList[mid].price)
+			return mid;
+		else if (price < mList[mid].price)
+			end = mid - 1;
+		else if (price > mList[mid].price)
+			start = mid - 1;
+	}
 }
 
 void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 {
-
-
 	switch (type)
 	{
-	case 0:// weight <= 1.3, ¸ğµç cpu Å¸ÀÔ Çã¿ë, ³»Àå
+	case 0:// weight <= 1.3, ëª¨ë“  cpu íƒ€ì… í—ˆìš©, ë‚´ì¥
 		for (int i = 0; i < n; i++)
 		{
 			if ((list[i].weight <= 1300) &&
@@ -99,7 +143,7 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 			}
 		}
 		break;
-	case 1:// weight <= 2.5, (3, 5, 7, 9) Çã¿ë, ³»Àå, ssd 128 <
+	case 1:// weight <= 2.5, (3, 5, 7, 9) í—ˆìš©, ë‚´ì¥, ssd 128 <
 		for (int i = 0; i < n; i++)
 		{
 			if ((list[i].weight <= 2500) &&
@@ -111,11 +155,11 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 			}
 		}
 		break;
-	case 2:// weight Á¦ÇÑ¾øÀ½, (7, 9) Çã¿ë, ¿ÜÀå, ssd 256 <
+	case 2:// weight ì œí•œì—†ìŒ, (7, 9) í—ˆìš©, ì™¸ì¥, ssd 256 <
 		for (int i = 0; i < n; i++)
 		{
 			if ((list[i].gpu == 1) &&
-				(list[i].cpu == "i7-11¼¼´ë" || list[i].cpu == "i9-11¼¼´ë") &&
+				(list[i].cpu == "i7-11ì„¸ëŒ€" || list[i].cpu == "i9-11ì„¸ëŒ€") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
 				mList.push_back(list[i]);
@@ -127,81 +171,109 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 
 
 int main() {
-
-	// file ºÒ·¯¿Í¼­ ¸®½ºÆ®¿¡ ÀúÀå
+	// file ë¶ˆëŸ¬ì™€ì„œ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥
 	Laptop list[969];
 	vector<Laptop> mList;
 	int n = 969;
 	int type;
 	int wishPrice;
 
-	int move = 0; int compare = 0; // -> ÀÚ·á ÀÌµ¿, °¡°İ ºñ±³ º¯¼ö 
+	int move = 0; int compare = 0; // -> ìë£Œ ì´ë™, ê°€ê²© ë¹„êµ ë³€ìˆ˜ 
 
-	//Laptop list ¸¸µé±â
+	//Laptop list ë§Œë“¤ê¸°
 	makeLaptopArr(list, "Real_Data_For_Project_Laptop_ver_2.csv");
 
-	// ¿ëµµ¿Í ¼±È£ °¡°İ ÀÔ·Â¹Ş±â 
-	cout << "¿øÇÏ½Ã´Â ³ëÆ®ºÏ Å¸ÀÔÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä.\n"
-		<< "0.»ç¹«¿ë  1.°³¹ß¿ë   2.°ÔÀÌ¹Ö¿ë";
+	// ìš©ë„ì™€ ì„ í˜¸ ê°€ê²© ì…ë ¥ë°›ê¸° 
+	cout << "ì›í•˜ì‹œëŠ” ë…¸íŠ¸ë¶ íƒ€ì…ì„ ì…ë ¥í•´ì£¼ì„¸ìš”.\n"
+		<< "0.ì‚¬ë¬´ìš©  1.ê°œë°œìš©   2.ê²Œì´ë°ìš©\n";
 	cin >> type;
 
-	// ¿ëµµ·Î ÇÊÅÍ¸µ 
+	heapsort(list, n);
+
+	// ìš©ë„ë¡œ í•„í„°ë§ 
 	makeList(list, mList, type, n);
 
-	cout << "¿øÇÏ½Ã´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+	cout << "ì›í•˜ì‹œëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : ";
 	cin >> wishPrice;
 
-	// ³Ê¹« ³·Àº ±İ¾× (Ãâ·ÂÇÒ ³ëÆ®ºÏÀÌ ¾øÀ» °æ¿ì) ¿¹¿Ü Ã³¸®
+	// ë„ˆë¬´ ë‚®ì€ ê¸ˆì•¡ (ì¶œë ¥í•  ë…¸íŠ¸ë¶ì´ ì—†ì„ ê²½ìš°) ì˜ˆì™¸ ì²˜ë¦¬
 	while (wishPrice < 273260) {
-		cout << "ÀÔ·ÂÇÏ½Å ±İ¾×ÀÌ ³Ê¹« ³·¾Æ ±İ¾×¿¡ ¸Â´Â ³ëÆ®ºÏÀÌ ¾ø½À´Ï´Ù.\n´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.\n";
-		cout << "¿øÇÏ½Ã´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+		cout << "ì…ë ¥í•˜ì‹  ê¸ˆì•¡ì´ ë„ˆë¬´ ë‚®ì•„ ê¸ˆì•¡ì— ë§ëŠ” ë…¸íŠ¸ë¶ì´ ì—†ìŠµë‹ˆë‹¤.\në‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”.\n";
+		cout << "ì›í•˜ì‹œëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : ";
 		cin >> wishPrice;
 	}
 
-
-
-	// °¡°İ ¼ø ÀçÁ¤·Ä ¾Ë°í¸®Áò
-	// -> °¢ÀÚ heap, quick, merge
-
-	// heap : ½ÂÇõ, quick : ÂùÈ£, merge : ÁöÇö -> °¢ÀÚ È®Àå 
-
-
-
-	// ºñ½ÁÇÑ °¡°İ´ë Ã³À½ ³ª¿À´Â ÀÎµ¦½º 
+	// ë¹„ìŠ·í•œ ê°€ê²©ëŒ€ ì²˜ìŒ ë‚˜ì˜¤ëŠ” ì¸ë±ìŠ¤ 
 	int idx = whatIndex(mList, wishPrice);
 
-	Laptop coutList[7];
+	Laptop coutlist[7];
+	int coutidx = 0;
+	int midx = mList.size();
 
-	for (int i = 0; i < 7; i++)
-	{ // index°¡ ÃÖ¼ÒÄ¡ÀÌ°Å³ª ÃÖ´ëÄ¡¿¡ ±ÙÁ¢ÇÑ °æ¿ì ¿¹¿Ü Ã³¸® ÇÊ¿ä
-		coutList[i] = mList[idx - 5];
-		idx++;
+	switch (idx)
+	{
+	case 0:
+		for (int i = 0; i < 3; i++)
+		{
+			coutlist[coutidx++] = mList[i];
+		}break;
+	case 1:
+		for (int i = 0; i < 4; i++)
+		{
+			coutlist[coutidx++] = mList[i];
+		}break;
+	case 2:
+		for (int i = 0; i < 5; i++)
+		{
+			coutlist[coutidx++] = mList[i];
+		}break;
+	case 3:
+		for (int i = 0; i < 6; i++)
+		{
+			coutlist[coutidx++] = mList[i];
+		}break;
+	case 4:
+		for (int i = 0; i < 7; i++)
+		{
+			coutlist[coutidx++] = mList[i];
+		}break;
+	default:
+		if (midx - idx <= 1)
+		{
+			for (int i = midx - 5; i < midx; i++)
+			{
+				coutlist[coutidx++] = mList[i];
+			}
+		}
+		else
+		{
+			for (int i = idx - 5; i < idx + 2; i++)
+			{
+				coutlist[coutidx++] = mList[i];
+			}
+		}
+		break;
 	}
 
-
-	// Å½»öÇÔ¼ö, Á¤·ÄÇÔ¼ö ½Ã°£, ÀÚ·áÀÌµ¿ È½¼ö, ºñ±³ È½¼ö ºñ±³ Ãâ·Â 
-	// -> ´ÙÀ½¿¡ Á¤ÇÏ±â 
-
-
-	// Ãâ·Â
-	cout << "            ³ëÆ®ºÏ ÃßÃµ ¸®½ºÆ®           " << endl;
+	// ì¶œë ¥
+	cout << "            ë…¸íŠ¸ë¶ ì¶”ì²œ ë¦¬ìŠ¤íŠ¸           " << endl;
 	cout << "-----------------------------------------" << endl;
-	for (int i = 0; i < 10; i++) {
-		cout << "Model : " << coutList[i].model
-			<< ", Price : " << coutList[i].price
-			<< ", CPU : " << coutList[i].cpu
-			<< ", RAM : " << coutList[i].ram << "GB";
+	for (int i = 0; i < coutidx; i++) {
+		cout << "model : " << coutlist[i].model
+			<< ", price : " << coutlist[i].price
+			<< ", cpu : " << coutlist[i].cpu
+			<< ", ram : " << coutlist[i].ram << "gb";
 
-		if (coutList[i].ssd >= 1000) cout << ", SSD : " << coutList[i].ssd << "TB";
-		else cout << ", SSD : " << coutList[i].ssd << "GB";
+		if (coutlist[i].ssd >= 1000) cout << ", ssd : " << coutlist[i].ssd << "tb";
+		else cout << ", ssd : " << coutlist[i].ssd << "gb";
 
-		if (coutList[i].weight >= 1000) cout << ", Weight : " << coutList[i].weight << "g";
-		else cout << ", Weight : " << (double)(coutList[i].weight) / 1000 << "Kg ";
+		if (coutlist[i].weight >= 1000) cout << ", weight : " << coutlist[i].weight << "g";
+		else cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
 
-		cout << ", Monitor : " << coutList[i].weight << "ÀÎÄ¡"
-			<< ", GPU : ";
-		if (coutList[i].gpu == 0) cout << "³»Àå";
-		else cout << "¿ÜÀå";
+		cout << ", monitor : " << coutlist[i].weight << "ì¸ì¹˜"
+			<< ", gpu : ";
+		if (coutlist[i].gpu == 0) cout << "ë‚´ì¥";
+		else cout << "ì™¸ì¥";
 	}
 
 	return 0;
