@@ -2,12 +2,14 @@
 #include <vector>
 #include <fstream>
 #include <string>
+
 using namespace std;
 
 /*
 	time, 비교횟수 저장하기
 */
 
+// Laptop
 class Laptop {
 public:
 	string model;
@@ -80,10 +82,16 @@ int whatIndex(vector<Laptop> mList, int price)
 
 	int index = 0;
 	// 탐색 알고리즘으로 입력된 금액보다 높은 가격이 나오는 첫 index
+	Node* r234 = newnode();
+	Node** root = &r234;
+	for (int i = 0; i < mList.size(); i++)
+		insert(root, mList[i]);
+
+	search(*root, price);
 	return index;
 }
 
-void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
+void makeList(Laptop list[], vector<Laptop> &mList, int type, int n)
 {
 
 
@@ -125,24 +133,201 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 	}
 }
 
+// For quick sort
+inline void swap(vector<Laptop> &a, int i, int j)
+{
+	Laptop t = a[i];
+	a[i] = a[j];
+	a[j] = t;
+}
+
+int partition(vector<Laptop> &a, int l, int r)
+{
+	int i, j=0;
+	int v;
+	if (r > l)
+	{
+		v = a[l].price;
+		i = l;
+		j = r + 1;
+		for (;;)
+		{
+			while (a[++i].price < v)
+				while (a[--j].price > v)
+					if (i >= j)
+						break;
+			swap(a, i, j);
+		}
+		swap(a, j, l);
+	}
+	return j;
+}
+
+void quicksort(vector<Laptop> &a, int l, int r)
+{
+	int j;
+	if (r > l)
+	{
+		j = partition(a, l, r);
+		quicksort(a, l, j - 1);
+		quicksort(a, j + 1, r);
+	}
+}
+
+// For 2-3-4 tree
+typedef struct nodes {
+	Laptop keys[3];
+	struct nodes* children[4];
+	int n;
+	bool leaf;
+} Node;
+
+void freetree(Node* x) {
+	if (!x->leaf) {
+		for (int i = 0; i < x->n; i++) {
+			freetree(x->children[i]);
+		}
+	}
+	free(x);
+}
+
+Node* newnode() {
+	Node* x = new Node;
+	x->n = 0;
+	x->leaf = true;
+	return x;
+}
+
+Node* insert(Node** root, Laptop newLap) {
+	Node* r = *root;
+	if (r->n == 3) {
+		
+		Node* a = newnode();
+		a->children[0] = r;
+		a->leaf = false;
+		*root = a;
+		splitChild(a, 0);
+		return insertnonfull(a, newLap);
+	}
+	else {
+		return insertnonfull(r, newLap);
+	}
+}
+
+Node* insertnonfull(Node* x, Laptop newLap) {
+	//find where to place value
+	int i = 0;
+	while (i < x->n && newLap.price > x->keys[i].price)
+		i++;
+	if (x->leaf) {
+		int j;
+		for (j = x->n; j > i; j--) {
+			x->keys[j] = x->keys[j - 1];
+		}
+		x->keys[j] = newLap;
+		x->n++;
+		return x;
+	}
+	else {
+		if (x->children[i]->n == 3) {
+			// node is full split it
+			splitChild(x, i);
+			if (newLap.price > x->keys[i].price) {
+				i++;
+			}
+		}
+		return insertnonfull(x->children[i], newLap);
+	}
+}
+
+Node* search(Node* x, int price) {
+	if (x->leaf) {
+		return x;
+	}
+
+	int i = 0;
+	while (i < x->n && price > x->keys[i].price) {
+		i++;
+	}
+	if (price == x->keys[i].price) {
+		return x;
+	}
+	else {
+		return search(x->children[i], price);
+	}
+}
+
+void splitChild(Node* x, int i) {
+	
+	Node* a = x->children[i];
+	Node* b = newnode();
+
+	for (int j = x->n; j > i; j--) {
+		x->children[j + 1] = x->children[j];
+		x->keys[j] = x->keys[j - 1];
+	}
+	// bring up the new key to i
+	x->keys[i] = a->keys[1];
+	x->children[i + 1] = b;
+	x->n++;
+	if (a->leaf) {
+		b->leaf = true;
+		
+		for (int j = 0; j < 1; j++) {
+			b->keys[j] = a->keys[j + 2];
+			b->n++;
+		}
+		a->n = 1;
+	}
+	else {
+		b->leaf = false;
+		
+		for (int j = 0; j < 1; j++) {
+			b->keys[j] = a->keys[j + 2];
+			b->children[j] = a->children[j + 2];
+			b->n++;
+		}
+		b->children[1] = a->children[3];
+		a->n = 1;
+		
+	}
+	
+}
+
+void printNode(Node* x) {
+	if (x == NULL) {
+		printf("Sorry no node there.\n");
+		return;
+	}
+	else if (x->n < 1) {
+		printf("There are no keys in this node.\n");
+		return;
+	}
+	int i;
+	for (i = 0; i < x->n - 1; i++) {
+		printf("%d ", x->keys[i].price);
+	}
+	printf("%d\n", x->keys[i].price);
+}
+
 
 int main() {
 
 	// file 불러와서 리스트에 저장
-	Laptop list[969];
+	Laptop list[20];
 	vector<Laptop> mList;
-	int n = 969;
+	int n = 20;
 	int type;
 	int wishPrice;
 
 	int move = 0; int compare = 0; // -> 자료 이동, 가격 비교 변수 
-
+	
 	//Laptop list 만들기
 	makeLaptopArr(list, "Real_Data_For_Project_Laptop_ver_2.csv");
 
 	// 용도와 선호 가격 입력받기 
 	cout << "원하시는 노트북 타입을 입력해주세요.\n"
-		<< "0.사무용  1.개발용   2.게이밍용";
+		<< "0.사무용  1.개발용   2.게이밍용 : ";
 	cin >> type;
 
 	// 용도로 필터링 
@@ -158,15 +343,14 @@ int main() {
 		cin >> wishPrice;
 	}
 
-
-
 	// 가격 순 재정렬 알고리즘
-	// -> 각자 heap, quick, merge
+	// quick sort
+	quicksort(mList, 0, n - 1);
 
-	// heap : 승혁, quick : 찬호, merge : 지현 -> 각자 확장 
-
-
-
+	for (int i = 0; i++; i < 10) {
+		cout << mList[i].price << " ";
+	}
+	cout << endl;
 	// 비슷한 가격대 처음 나오는 인덱스 
 	int idx = whatIndex(mList, wishPrice);
 
