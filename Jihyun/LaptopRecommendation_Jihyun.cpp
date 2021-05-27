@@ -2,11 +2,129 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <ctime>
 using namespace std;
 
-/*
-	time, ºñ±³È½¼ö ÀúÀåÇÏ±â
-*/
+#define infoNIL 0
+#define itemMIN -1
+#define black 0
+#define red 1
+
+class Laptop;
+typedef Laptop itemType;
+typedef double infoType;
+
+// RED-BLACK
+class RBtree {
+private:
+	struct node {
+		itemType key, tag;
+		infoType Info;
+		struct node* l, * r;
+		node(itemType k, infoType i, itemType t, struct node* ll, struct node* rr) {
+			key = k; Info = i; tag = t; l = ll; r = rr;
+		}
+	};
+	struct node* head, * tail, * x, * p, * g, * gg, * z;
+
+public:
+
+	RBtree() {
+		z = new node(0, infoNIL, black, 0, 0);  
+		z->l = z; z->r = z;
+		head = new node(itemMIN, infoNIL, black, z, z);	// ì‹¤ì œ infoëŠ” 1ë¶€í„° ì‹œì‘
+	}
+
+	void insert(itemType k, infoType info, int& compare) {
+		x = head; p = head; g = head;
+		while (x != z) {
+			gg = g; g = p; p = x;
+			x = (k < x->key) ? x->l : x->r; compare++;
+			if (x->l->tag && x->r->tag) split(k, compare);   
+		}
+		x = new node(k, info, red, z, z);
+		if (k < p->key) p->l = x; else p->r = x; compare++;
+		split(k, compare); head->r->tag = black; 
+	}
+
+	struct node* rotate(itemType k, struct node* y, int& compare) {
+		struct node* high, * low;
+		high = (k < y->key) ? y->l : y->r; compare++;
+		if (k < high->key) { low = high->l; high->l = low->r; low->r = high; }
+		else { low = high->r; high->r = low->l; low->l = high; }    
+		compare++;
+		if (k < y->key) y->l = low; else y->r = low; 
+		compare++;
+		return low;
+	}
+
+	void split(itemType k, int& compare) {
+		x->tag = red; x->l->tag = black; x->r->tag = black;
+		if (p->tag) {   
+			g->tag = red;
+			if (k < g->key != k < p->key) p = rotate(k, g, compare);
+			compare++;
+			x = rotate(k, gg, compare);
+			x->tag = black;
+		}
+	}
+	infoType search(itemType k, int& compare) {
+		// ì°¾ëŠ” ê°€ê²©ì˜ ê¸ˆì•¡ëŒ€ê°€ ì•ˆë‚˜ì˜¬ê²½ìš° 
+		struct node* x = head->r;
+		z->key.price = k.price;  
+		while (x->r != NULL) {
+			compare++;
+			if (k.price == x->key.price) {
+				return x->Info
+			}
+			else {
+				x = (k.price < x->key.price) ? x->l : x->r;
+			}
+		}
+		compare++;
+		if (x->l != NULL) {
+			if (k.price < x->key.price) return x->Info;
+			else {
+				cout << "ì…ë ¥í•˜ì‹  ê¸ˆì•¡ì´ ë„ˆë¬´ ë†’ì•„ ê¸ˆì•¡ì— ë§ëŠ” ë…¸íŠ¸ë¶ì´ ì—†ìŠµë‹ˆë‹¤.\në‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”." << endl;
+				return -1;
+			}
+		}else return x->Info;
+	}
+};
+
+void merge(itemType a[], int l, int mid, int r, int& compare, int& move) {
+	int i, j, k, n;
+	i = l; j = mid + 1; k = l;
+	while (i <= mid && j <= r) {
+		if (a[i] <= a[j]) {
+			compare++;
+			sorted[k++] = a[i++];
+			move++;
+		}
+		else {
+			compare++;
+			sorted[k++] = a[j++];
+			move++;
+		}
+	}
+	if (i > mid) {
+		for (n = j; n <= r; n++) { sorted[k++] = a[n]; move++; }
+	}
+	else {
+		for (n = i; n <= mid; n++) { sorted[k++] = a[n]; move++; }
+	}
+	for (n = l; n <= r; n++) { a[n] = sorted[n]; move++; }
+}
+
+void mergesort(itemType a[], int l, int r, int& compare, int& move) {
+	int mid;
+	if (l < r) {
+		mid = (l + r) / 2;
+		mergesort(a, l, mid, compare, move);
+		mergesort(a, mid + 1, r, compare, move);
+		merge(a, l, mid, r, compare, move);
+	}
+}
 
 class Laptop {
 public:
@@ -16,7 +134,7 @@ public:
 	int ram;
 	int ssd;
 	int weight;
-	bool gpu; // ³»Àå : 0, ¿ÜÀå : 1
+	bool gpu; // ë‚´ì¥ : 0, ì™¸ì¥ : 1
 	double monitor;
 
 	Laptop() {
@@ -61,8 +179,8 @@ void makeLaptopArr(Laptop list[], string fileName) {
 			else if (position == 5) list[aggIdx].weight = stoi(str);
 			else if (position == 6) list[aggIdx].monitor = stod(str);
 			else if (position == 7) {
-				if (str == "³»Àå") list[aggIdx].gpu = 0;
-				else if (str == "¿ÜÀå") list[aggIdx].gpu = 1;
+				if (str == "ë‚´ì¥") list[aggIdx].gpu = 0;
+				else if (str == "ì™¸ì¥") list[aggIdx].gpu = 1;
 			}
 			position++;
 		}
@@ -73,14 +191,16 @@ void makeLaptopArr(Laptop list[], string fileName) {
 
 }
 
-int whatIndex(vector<Laptop> mList, int price)
+int whatIndex(vector<Laptop> mList, int price, int n, int compare)
 {
-	// ÀÌÁø³ª¹«, 2-3-4³ª¹«, ÈæÀû³ª¹«
-	// ÀÌÁø : ½ÂÇõ, 2-3-4³ª¹« : ÂùÈ£, ÈæÀû³ª¹« : ÁöÇö 
-
-	int index = 0;
-	// Å½»ö ¾Ë°í¸®ÁòÀ¸·Î ÀÔ·ÂµÈ ±İ¾×º¸´Ù ³ôÀº °¡°İÀÌ ³ª¿À´Â Ã¹ index
-	return index;
+	// í‘ì ë‚˜ë¬´
+	// íƒìƒ‰ ì•Œê³ ë¦¬ì¦˜ìœ¼ë¡œ ì…ë ¥ëœ ê¸ˆì•¡ë³´ë‹¤ ë†’ì€ ê°€ê²©ì´ ë‚˜ì˜¤ëŠ” ì²« index
+	int info = 0;
+	RBtree T();
+	for (int i = 0; i < n; i++) {
+		T.insert(mList[i], ++info, compare); 
+	}
+	return T.search()
 }
 
 void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
@@ -89,7 +209,7 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 
 	switch (type)
 	{
-	case 0:// weight <= 1.3, ¸ğµç cpu Å¸ÀÔ Çã¿ë, ³»Àå
+	case 0:// weight <= 1.3, ëª¨ë“  cpu íƒ€ì… í—ˆìš©, ë‚´ì¥
 		for (int i = 0; i < n; i++)
 		{
 			if ((list[i].weight <= 1300) &&
@@ -99,7 +219,7 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 			}
 		}
 		break;
-	case 1:// weight <= 2.5, (3, 5, 7, 9) Çã¿ë, ³»Àå, ssd 128 <
+	case 1:// weight <= 2.5, (3, 5, 7, 9) í—ˆìš©, ë‚´ì¥, ssd 128 <
 		for (int i = 0; i < n; i++)
 		{
 			if ((list[i].weight <= 2500) &&
@@ -111,11 +231,11 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 			}
 		}
 		break;
-	case 2:// weight Á¦ÇÑ¾øÀ½, (7, 9) Çã¿ë, ¿ÜÀå, ssd 256 <
+	case 2:// weight ì œí•œì—†ìŒ, (7, 9) í—ˆìš©, ì™¸ì¥, ssd 256 <
 		for (int i = 0; i < n; i++)
 		{
 			if ((list[i].gpu == 1) &&
-				(list[i].cpu == "i7-11¼¼´ë" || list[i].cpu == "i9-11¼¼´ë") &&
+				(list[i].cpu == "i7-11ì„¸ëŒ€" || list[i].cpu == "i9-11ì„¸ëŒ€") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
 				mList.push_back(list[i]);
@@ -128,63 +248,67 @@ void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
 
 int main() {
 
-	// file ºÒ·¯¿Í¼­ ¸®½ºÆ®¿¡ ÀúÀå
+	// file ë¶ˆëŸ¬ì™€ì„œ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥
 	Laptop list[969];
 	vector<Laptop> mList;
 	int n = 969;
 	int type;
 	int wishPrice;
 
-	int move = 0; int compare = 0; // -> ÀÚ·á ÀÌµ¿, °¡°İ ºñ±³ º¯¼ö 
+	int move = 0; int compare = 0; // -> ìë£Œ ì´ë™, ê°€ê²© ë¹„êµ ë³€ìˆ˜ 
 
-	//Laptop list ¸¸µé±â
+	//Laptop list ë§Œë“¤ê¸°
 	makeLaptopArr(list, "Real_Data_For_Project_Laptop_ver_2.csv");
 
-	// ¿ëµµ¿Í ¼±È£ °¡°İ ÀÔ·Â¹Ş±â 
-	cout << "¿øÇÏ½Ã´Â ³ëÆ®ºÏ Å¸ÀÔÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä.\n"
-		<< "0.»ç¹«¿ë  1.°³¹ß¿ë   2.°ÔÀÌ¹Ö¿ë";
+	// ìš©ë„ì™€ ì„ í˜¸ ê°€ê²© ì…ë ¥ë°›ê¸° 
+	cout << "ì›í•˜ì‹œëŠ” ë…¸íŠ¸ë¶ íƒ€ì…ì„ ì…ë ¥í•´ì£¼ì„¸ìš”." << endl
+		<< "0.ì‚¬ë¬´ìš©  1.ê°œë°œìš©   2.ê²Œì´ë°ìš©" << endl;
 	cin >> type;
 
-	// ¿ëµµ·Î ÇÊÅÍ¸µ 
+	// ìš©ë„ë¡œ í•„í„°ë§ 
 	makeList(list, mList, type, n);
 
-	cout << "¿øÇÏ½Ã´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+	cout << "ì›í•˜ì‹œëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : " <<endl;
 	cin >> wishPrice;
 
-	// ³Ê¹« ³·Àº ±İ¾× (Ãâ·ÂÇÒ ³ëÆ®ºÏÀÌ ¾øÀ» °æ¿ì) ¿¹¿Ü Ã³¸®
+	// ë„ˆë¬´ ë‚®ì€ ê¸ˆì•¡ (ì¶œë ¥í•  ë…¸íŠ¸ë¶ì´ ì—†ì„ ê²½ìš°) ì˜ˆì™¸ ì²˜ë¦¬
 	while (wishPrice < 273260) {
-		cout << "ÀÔ·ÂÇÏ½Å ±İ¾×ÀÌ ³Ê¹« ³·¾Æ ±İ¾×¿¡ ¸Â´Â ³ëÆ®ºÏÀÌ ¾ø½À´Ï´Ù.\n´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.\n";
-		cout << "¿øÇÏ½Ã´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+		cout << "ì…ë ¥í•˜ì‹  ê¸ˆì•¡ì´ ë„ˆë¬´ ë‚®ì•„ ê¸ˆì•¡ì— ë§ëŠ” ë…¸íŠ¸ë¶ì´ ì—†ìŠµë‹ˆë‹¤.\në‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”.\n";
+		cout << "ì›í•˜ì‹œëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : ";
 		cin >> wishPrice;
 	}
 
+	// ê°€ê²© ìˆœ ì¬ì •ë ¬ ì•Œê³ ë¦¬ì¦˜
+	// merge
+	mergesort(mList, o, compare, move);
 
-
-	// °¡°İ ¼ø ÀçÁ¤·Ä ¾Ë°í¸®Áò
-	// -> °¢ÀÚ heap, quick, merge
-
-	// heap : ½ÂÇõ, quick : ÂùÈ£, merge : ÁöÇö -> °¢ÀÚ È®Àå 
-
-
-
-	// ºñ½ÁÇÑ °¡°İ´ë Ã³À½ ³ª¿À´Â ÀÎµ¦½º 
+	// ë¹„ìŠ·í•œ ê°€ê²©ëŒ€ ì²˜ìŒ ë‚˜ì˜¤ëŠ” ì¸ë±ìŠ¤ 
 	int idx = whatIndex(mList, wishPrice);
+	if (idx == -1) return 0;
+	idx--;	// rbtreeì—ì„  index 1ë¶€í„° ì‹œì‘ì´ë¯€ë¡œ 
 
 	Laptop coutList[7];
-
-	for (int i = 0; i < 7; i++)
-	{ // index°¡ ÃÖ¼ÒÄ¡ÀÌ°Å³ª ÃÖ´ëÄ¡¿¡ ±ÙÁ¢ÇÑ °æ¿ì ¿¹¿Ü Ã³¸® ÇÊ¿ä
-		coutList[i] = mList[idx - 5];
-		idx++;
+	
+	if (idx < 5) {
+		for (int i = 0; i < 7; i++) {
+			coutList[i] = mList[idx];;
+			idx++;
+		}
+	}
+	else {
+		for (int i = 0; i < 7; i++)
+		{ // indexê°€ ìµœì†Œì¹˜ì´ê±°ë‚˜ ìµœëŒ€ì¹˜ì— ê·¼ì ‘í•œ ê²½ìš° ì˜ˆì™¸ ì²˜ë¦¬ í•„ìš”
+			coutList[i] = mList[idx - 5];
+			idx++;
+		}
 	}
 
+	// íƒìƒ‰í•¨ìˆ˜, ì •ë ¬í•¨ìˆ˜ ì‹œê°„, ìë£Œì´ë™ íšŸìˆ˜, ë¹„êµ íšŸìˆ˜ ë¹„êµ ì¶œë ¥ 
+	// -> ë‹¤ìŒì— ì •í•˜ê¸° 
 
-	// Å½»öÇÔ¼ö, Á¤·ÄÇÔ¼ö ½Ã°£, ÀÚ·áÀÌµ¿ È½¼ö, ºñ±³ È½¼ö ºñ±³ Ãâ·Â 
-	// -> ´ÙÀ½¿¡ Á¤ÇÏ±â 
 
-
-	// Ãâ·Â
-	cout << "            ³ëÆ®ºÏ ÃßÃµ ¸®½ºÆ®           " << endl;
+	// ì¶œë ¥
+	cout << "            ë…¸íŠ¸ë¶ ì¶”ì²œ ë¦¬ìŠ¤íŠ¸           " << endl;
 	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < 10; i++) {
 		cout << "Model : " << coutList[i].model
@@ -198,10 +322,10 @@ int main() {
 		if (coutList[i].weight >= 1000) cout << ", Weight : " << coutList[i].weight << "g";
 		else cout << ", Weight : " << (double)(coutList[i].weight) / 1000 << "Kg ";
 
-		cout << ", Monitor : " << coutList[i].weight << "ÀÎÄ¡"
+		cout << ", Monitor : " << coutList[i].weight << "ì¸ì¹˜"
 			<< ", GPU : ";
-		if (coutList[i].gpu == 0) cout << "³»Àå";
-		else cout << "¿ÜÀå";
+		if (coutList[i].gpu == 0) cout << "ë‚´ì¥";
+		else cout << "ì™¸ì¥";
 	}
 
 	return 0;
