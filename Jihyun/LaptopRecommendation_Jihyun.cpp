@@ -2,129 +2,14 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <ctime>
-using namespace std;
 
-#define infoNIL 0
-#define itemMIN -1
+#define MAX 970
 #define black 0
 #define red 1
 
-class Laptop;
-typedef Laptop itemType;
-typedef double infoType;
+using namespace std;
 
-// RED-BLACK
-class RBtree {
-private:
-	struct node {
-		itemType key, tag;
-		infoType Info;
-		struct node* l, * r;
-		node(itemType k, infoType i, itemType t, struct node* ll, struct node* rr) {
-			key = k; Info = i; tag = t; l = ll; r = rr;
-		}
-	};
-	struct node* head, * tail, * x, * p, * g, * gg, * z;
-
-public:
-
-	RBtree() {
-		z = new node(0, infoNIL, black, 0, 0);  
-		z->l = z; z->r = z;
-		head = new node(itemMIN, infoNIL, black, z, z);	// 실제 info는 1부터 시작
-	}
-
-	void insert(itemType k, infoType info, int& compare) {
-		x = head; p = head; g = head;
-		while (x != z) {
-			gg = g; g = p; p = x;
-			x = (k < x->key) ? x->l : x->r; compare++;
-			if (x->l->tag && x->r->tag) split(k, compare);   
-		}
-		x = new node(k, info, red, z, z);
-		if (k < p->key) p->l = x; else p->r = x; compare++;
-		split(k, compare); head->r->tag = black; 
-	}
-
-	struct node* rotate(itemType k, struct node* y, int& compare) {
-		struct node* high, * low;
-		high = (k < y->key) ? y->l : y->r; compare++;
-		if (k < high->key) { low = high->l; high->l = low->r; low->r = high; }
-		else { low = high->r; high->r = low->l; low->l = high; }    
-		compare++;
-		if (k < y->key) y->l = low; else y->r = low; 
-		compare++;
-		return low;
-	}
-
-	void split(itemType k, int& compare) {
-		x->tag = red; x->l->tag = black; x->r->tag = black;
-		if (p->tag) {   
-			g->tag = red;
-			if (k < g->key != k < p->key) p = rotate(k, g, compare);
-			compare++;
-			x = rotate(k, gg, compare);
-			x->tag = black;
-		}
-	}
-	infoType search(itemType k, int& compare) {
-		// 찾는 가격의 금액대가 안나올경우 
-		struct node* x = head->r;
-		z->key.price = k.price;  
-		while (x->r != NULL) {
-			compare++;
-			if (k.price == x->key.price) {
-				return x->Info
-			}
-			else {
-				x = (k.price < x->key.price) ? x->l : x->r;
-			}
-		}
-		compare++;
-		if (x->l != NULL) {
-			if (k.price < x->key.price) return x->Info;
-			else {
-				cout << "입력하신 금액이 너무 높아 금액에 맞는 노트북이 없습니다.\n다시 입력해주세요." << endl;
-				return -1;
-			}
-		}else return x->Info;
-	}
-};
-
-void merge(itemType a[], int l, int mid, int r, int& compare, int& move) {
-	int i, j, k, n;
-	i = l; j = mid + 1; k = l;
-	while (i <= mid && j <= r) {
-		if (a[i] <= a[j]) {
-			compare++;
-			sorted[k++] = a[i++];
-			move++;
-		}
-		else {
-			compare++;
-			sorted[k++] = a[j++];
-			move++;
-		}
-	}
-	if (i > mid) {
-		for (n = j; n <= r; n++) { sorted[k++] = a[n]; move++; }
-	}
-	else {
-		for (n = i; n <= mid; n++) { sorted[k++] = a[n]; move++; }
-	}
-	for (n = l; n <= r; n++) { a[n] = sorted[n]; move++; }
-}
-
-void mergesort(itemType a[], int l, int r, int& compare, int& move) {
-	int mid;
-	if (l < r) {
-		mid = (l + r) / 2;
-		mergesort(a, l, mid, compare, move);
-		mergesort(a, mid + 1, r, compare, move);
-		merge(a, l, mid, r, compare, move);
-	}
-}
+int compare = 0;
 
 class Laptop {
 public:
@@ -149,12 +34,16 @@ public:
 	}
 };
 
+Laptop* sorted = new Laptop[2000];
+
 void makeLaptopArr(Laptop list[], string fileName) {
 	int position = 0; // Column number
 	int aggIdx = 0; // Aggregate index number
 	string str_buf;
 	ifstream readFile;
+
 	readFile.open(fileName);
+
 	if (readFile.is_open()) {
 		while (!readFile.eof()) {
 			if (position == 8) {
@@ -188,70 +77,219 @@ void makeLaptopArr(Laptop list[], string fileName) {
 	else {
 		cout << "Error : File could not be opend.\n";
 	}
-
 }
 
-int whatIndex(vector<Laptop> mList, int price, int n, int compare)
+void copy(Laptop& a, Laptop& b) {
+	a.model = b.model;
+	a.price = b.price;
+	a.cpu = b.cpu;
+	a.ram = b.ram;
+	a.ssd = b.ssd;
+	a.weight = b.weight;
+	a.gpu = b.gpu;
+	a.monitor = b.monitor;
+}
+
+// 가격 정렬
+void merge(Laptop* a, int l, int mid, int r, int& compare, int& move) {
+	int i, j, k, n;
+	i = l; j = mid + 1; k = l;
+	while (i <= mid && j <= r) {
+		if (a[i].price <= a[j].price) {
+			compare++;
+			copy(sorted[k++], a[i++]);
+			move++;
+		}
+		else {
+			compare++;
+			copy(sorted[k++], a[j++]);
+			move++;
+		}
+	}
+	if (i > mid) {
+		for (n = j; n <= r; n++) { copy(sorted[k++], a[n]); move++; }
+	}
+	else {
+		for (n = i; n <= mid; n++) { copy(sorted[k++], a[n]); move++; }
+	}
+	for (n = l; n <= r; n++) { copy(a[n], sorted[n]); move++; }
+}
+
+void mergesort(Laptop* a, int l, int r, int& compare, int& move) {
+	int mid;
+	if (l < r) {
+		mid = (l + r) / 2;
+		mergesort(a, l, mid, compare, move);
+		mergesort(a, mid + 1, r, compare, move);
+		merge(a, l, mid, r, compare, move);
+	}
+}
+
+// RED-BLACK
+class RBtree {
+private:
+	struct node {
+		Laptop key;
+		int tag;
+		int Info;
+		struct node* l, * r;
+		node(Laptop k, int i, int t, struct node* ll, struct node* rr) {
+			copy(key, k);
+			Info = i; tag = t; l = ll; r = rr;
+		}
+	};
+	struct node* head, * tail, * x, * p, * g, * gg, * z;
+
+public:
+
+	RBtree() {
+		Laptop null;
+		z = new node(null, -1, black, 0, 0);  // NULL노드
+		z->l = z; z->r = z;
+		head = new node(null, -1, black, z, z); // 실제 info는 0부터 시작 
+	}
+
+	void insert(Laptop k, int info, int& compare) {
+		x = head; p = head; g = head;
+		while (x != z) {
+			gg = g; g = p; p = x;
+			x = (k.price < x->key.price) ? x->l : x->r; compare++;
+			if (x->l->tag && x->r->tag) split(k, compare);   // x가 4노드라면 split 
+		}
+		x = new node(k, info, red, z, z);
+		if (k.price < p->key.price) p->l = x; else p->r = x; compare++;
+		split(k, compare); head->r->tag = black; // 일단 모두 적링크로 부여하고 한번 더 split
+	}
+
+	struct node* rotate(Laptop k, struct node* y, int& compare) {
+		struct node* high, * low;
+		high = (k.price < y->key.price) ? y->l : y->r; compare++;
+		if (k.price < high->key.price) { low = high->l; high->l = low->r; low->r = high; }
+		else { low = high->r; high->r = low->l; low->l = high; }
+		compare++;
+		if (k.price < y->key.price) y->l = low; else y->r = low;
+		compare++;
+		return low;
+	}
+
+	void split(Laptop k, int& compare) {
+		x->tag = red; x->l->tag = black; x->r->tag = black;
+		if (p->tag) {
+			g->tag = red;
+			if (k.price < g->key.price != k.price < p->key.price) p = rotate(k, g, compare);
+			compare++;
+			x = rotate(k, gg, compare);
+			x->tag = black;
+		}
+	}
+
+	int search(int price, int& compare) {
+
+		// 값 중복되는경우 
+		// 찾는 가격의 금액대가 안나올경우 
+		struct node* x = head->r;
+		z->key.price = price;
+		while (x->r != z && x->l != z) {
+			compare++;
+			if (price == x->key.price) {
+				return x->Info;
+			}
+			else {
+				x = (price < x->key.price) ? x->l : x->r;
+			}
+		}
+		compare++;
+		if (x->l == z && x->r == z) { // 자식노드 없는 경우  
+			if (price == x->key.price) {
+				return x->Info;
+			}
+			else {
+				return x->Info + 1;
+			}
+		}
+		else if (x->l != NULL) { // 왼쪽 자식만 있는 경우
+			if (price == x->key.price) {
+				return x->Info;
+			}
+			else if (price < x->key.price) x = x->l;
+			else return x->Info + 1;
+
+		}
+		else {	// 오른쪽 자식만 있는 경우 
+			if (price == x->key.price) {
+				return x->Info;
+			}
+			else if (price < x->key.price) return x->Info;
+			else x = x->r;
+		}
+	}
+};
+
+
+int whatIndex(Laptop list[], int price)
 {
 	// 흑적나무
 	// 탐색 알고리즘으로 입력된 금액보다 높은 가격이 나오는 첫 index
 	int info = 0;
-	RBtree T();
-	for (int i = 0; i < n; i++) {
-		T.insert(mList[i], ++info, compare); 
+	RBtree T;
+	for (int i = 0; i < MAX - 1; i++) {
+		T.insert(list[i], info++, compare);
 	}
-	return T.search()
+	return T.search(price, compare);
 }
 
-void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
+void makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 {
-
-
 	switch (type)
 	{
 	case 0:// weight <= 1.3, 모든 cpu 타입 허용, 내장
-		for (int i = 0; i < n; i++)
+		while (coutidx < 5)
 		{
-			if ((list[i].weight <= 1300) &&
-				(list[i].gpu == 0))
+			for (int i = idx; i > 0; i--)
 			{
-				mList.push_back(list[i]);
+				if ((list[i].weight <= 1300) &&
+					(list[i].gpu == 0))
+				{
+					//coutlist[coutidx++] = list[i];
+					copy(coutlist[coutidx++], list[i]);
+				}
 			}
 		}
 		break;
 	case 1:// weight <= 2.5, (3, 5, 7, 9) 허용, 내장, ssd 128 <
-		for (int i = 0; i < n; i++)
-		{
-			if ((list[i].weight <= 2500) &&
-				(list[i].gpu == 0) &&
-				(list[i].cpu.at(0) == 'i') &&
-				(list[i].ssd > 128))
+		while (coutidx < 5) {
+			for (int i = 0; i < MAX; i++)
 			{
-				mList.push_back(list[i]);
+				if ((list[i].weight <= 2500) &&
+					(list[i].gpu == 0) &&
+					(list[i].cpu.at(0) == 'i') &&
+					(list[i].ssd > 128))
+				{
+					copy(coutlist[coutidx++], list[i]);
+				}
 			}
 		}
 		break;
 	case 2:// weight 제한없음, (7, 9) 허용, 외장, ssd 256 <
-		for (int i = 0; i < n; i++)
-		{
-			if ((list[i].gpu == 1) &&
-				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
-				(list[i].ssd > 256) && list[i].monitor > 15)
+		while (coutidx < 5) {
+			for (int i = 0; i < MAX; i++)
 			{
-				mList.push_back(list[i]);
+				if ((list[i].gpu == 1) &&
+					(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
+					(list[i].ssd > 256) && list[i].monitor > 15)
+				{
+					copy(coutlist[coutidx++], list[i]);
+				}
 			}
 		}
 		break;
 	}
 }
 
-
 int main() {
 
 	// file 불러와서 리스트에 저장
-	Laptop list[969];
-	vector<Laptop> mList;
-	int n = 969;
+	Laptop list[MAX];
 	int type;
 	int wishPrice;
 
@@ -261,72 +299,87 @@ int main() {
 	makeLaptopArr(list, "Real_Data_For_Project_Laptop_ver_2.csv");
 
 	// 용도와 선호 가격 입력받기 
-	cout << "원하시는 노트북 타입을 입력해주세요." << endl
-		<< "0.사무용  1.개발용   2.게이밍용" << endl;
+	cout << "원하시는 노트북 타입을 입력해주세요.\n"
+		<< "0.사무용  1.개발용   2.게이밍용\n";
 	cin >> type;
 
-	// 용도로 필터링 
-	makeList(list, mList, type, n);
+	if (type != 0 && type != 1 && type != 2) {
+		cout << "잘못된 타입을 입력하셨습니다." << endl;
+		return 0;
+	}
 
-	cout << "원하시는 가격을 입력해주세요(원 단위) : " <<endl;
+	/********************정렬***********************/
+	mergesort(list, 0, MAX - 2, compare, move);
+
+	cout << "원하시는 가격을 입력해주세요(원 단위) : ";
 	cin >> wishPrice;
 
-	// 너무 낮은 금액 (출력할 노트북이 없을 경우) 예외 처리
+	//너무 낮은 금액 (출력할 노트북이 없을 경우) 예외 처리
 	while (wishPrice < 273260) {
 		cout << "입력하신 금액이 너무 낮아 금액에 맞는 노트북이 없습니다.\n다시 입력해주세요.\n";
 		cout << "원하시는 가격을 입력해주세요(원 단위) : ";
 		cin >> wishPrice;
 	}
 
-	// 가격 순 재정렬 알고리즘
-	// merge
-	mergesort(mList, o, compare, move);
-
+	/********************탐색***********************/
 	// 비슷한 가격대 처음 나오는 인덱스 
-	int idx = whatIndex(mList, wishPrice);
-	if (idx == -1) return 0;
-	idx--;	// rbtree에선 index 1부터 시작이므로 
+	int idx = whatIndex(list, wishPrice);
+	cout << "idx: " << idx << endl;
 
-	Laptop coutList[7];
-	
-	if (idx < 5) {
-		for (int i = 0; i < 7; i++) {
-			coutList[i] = mList[idx];;
-			idx++;
-		}
-	}
-	else {
-		for (int i = 0; i < 7; i++)
-		{ // index가 최소치이거나 최대치에 근접한 경우 예외 처리 필요
-			coutList[i] = mList[idx - 5];
-			idx++;
-		}
-	}
+	Laptop coutlist[5];
+	int coutidx = 0;
+	idx = 400;
 
-	// 탐색함수, 정렬함수 시간, 자료이동 횟수, 비교 횟수 비교 출력 
-	// -> 다음에 정하기 
+	/********************필터링***********************/
+	makeList(list, coutlist, type, coutidx, idx);
 
-
+	/*/
 	// 출력
 	cout << "            노트북 추천 리스트           " << endl;
 	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < 10; i++) {
-		cout << "Model : " << coutList[i].model
-			<< ", Price : " << coutList[i].price
-			<< ", CPU : " << coutList[i].cpu
-			<< ", RAM : " << coutList[i].ram << "GB";
+		cout << "model : " << list[i].model
+			<< ", price : " << list[i].price
+			<< ", cpu : " << list[i].cpu
+			<< ", ram : " << list[i].ram << "gb";
 
-		if (coutList[i].ssd >= 1000) cout << ", SSD : " << coutList[i].ssd << "TB";
-		else cout << ", SSD : " << coutList[i].ssd << "GB";
+		if (list[i].ssd >= 1000) cout << ", ssd : " << list[i].ssd << "tb";
+		else cout << ", ssd : " << list[i].ssd << "gb";
 
-		if (coutList[i].weight >= 1000) cout << ", Weight : " << coutList[i].weight << "g";
-		else cout << ", Weight : " << (double)(coutList[i].weight) / 1000 << "Kg ";
+		if (list[i].weight >= 1000) cout << ", weight : " << list[i].weight << "g";
+		else cout << ", weight : " << (double)(list[i].weight) / 1000 << "kg ";
 
-		cout << ", Monitor : " << coutList[i].weight << "인치"
-			<< ", GPU : ";
-		if (coutList[i].gpu == 0) cout << "내장";
+		cout << ", monitor : " << list[i].weight << "인치"
+			<< ", gpu : ";
+		if (list[i].gpu == 0) cout << "내장";
 		else cout << "외장";
-	}
+
+		cout << endl;
+	}*/
+
+	
+	/*
+	// 출력
+	cout << "            노트북 추천 리스트           " << endl;
+	cout << "-----------------------------------------" << endl;
+	for (int i = 0; i < coutidx; i++) {
+		cout << "model : " << coutlist[i].model
+			<< ", price : " << coutlist[i].price
+			<< ", cpu : " << coutlist[i].cpu
+			<< ", ram : " << coutlist[i].ram << "gb";
+
+		if (coutlist[i].ssd >= 1000) cout << ", ssd : " << coutlist[i].ssd << "tb";
+		else cout << ", ssd : " << coutlist[i].ssd << "gb";
+
+		if (coutlist[i].weight >= 1000) cout << ", weight : " << coutlist[i].weight << "g";
+		else cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
+
+		cout << ", monitor : " << coutlist[i].weight << "인치"
+			<< ", gpu : ";
+		if (coutlist[i].gpu == 0) cout << "내장";
+		else cout << "외장";
+	}*/
+
 
 	return 0;
 }
