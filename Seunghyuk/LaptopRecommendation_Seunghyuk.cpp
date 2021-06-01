@@ -326,19 +326,7 @@ int main() {
 	cin >> type;
 
 	/********************정렬***********************/
-	cout << "정렬 시작" << endl;
 	heapsort(list, n);
-	cout << "정렬 끝" << endl;
-
-	for (int i = 1; i <= 10; i++)
-	{
-		cout << list[i].price << ", ";
-	}cout << endl;
-	for (int i = MAX-11; i < MAX-1; i++)
-	{
-		cout << list[i].price << ", ";
-	}cout << endl;
-
 
 	cout << "원하시는 가격을 입력해주세요(원 단위) : ";
 	cin >> wishPrice;
@@ -352,17 +340,13 @@ int main() {
 
 	/********************탐색***********************/
 	// 비슷한 가격대 처음 나오는 인덱스 
-	cout << "인덱스 서치 시작" << endl;
 	int idx = whatIndex(list, wishPrice);
 	printf("인덱스 값 : %d\n", idx);
-	cout << "인덱스 서치 끝" << endl;
 
 	Laptop coutlist[7];
 	int coutidx = 0;
 	/********************필터링***********************/
-	cout << "필터링 시작" << endl;
 	coutidx = makeList(list, coutlist, type, coutidx, idx);
-	cout << "필터링 끝" << endl;
 
 	// 출력
 	cout << "            노트북 추천 리스트           " << endl;
