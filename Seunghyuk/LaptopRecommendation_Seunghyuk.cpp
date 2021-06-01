@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#define MAX 970
 using namespace std;
 
 /*
@@ -109,74 +110,210 @@ void makeLaptopArr(Laptop list[], string fileName) {
 
 }
 
-int whatIndex(vector<Laptop> mList, int price)
+int whatIndex(Laptop list[], int price)
 {
-	int start = 0;
-	int end = mList.size() - 1;
+	int start = 1;
+	int end = MAX - 1;
+	int i = 0;
+	int pstart = 1;
+	int pend = MAX - 1;
 
+	if (price > list[end].price)
+		return end;
 	while (start <= end)
 	{
+		i++;
+		printf("%d회차 탐색 start=%d, end=%d\n", i, start, end);
 		int mid = (start + end) / 2;
-
-		if (start + 1 == end) // 좀 더 명확한 조건문 필요
-			return end;
-		else if (price == mList[mid].price)
+		if (list[start].price == list[end].price)
+		{
+			if (price < list[start].price)
+			{
+				int temp = list[start].price;
+				while ((temp != list[start].price) && start != 0)
+				{
+					start--;
+				}
+				return start;
+			}
+			else if (price > list[end].price)
+			{
+				int temp = list[end].price;
+				while ((temp != list[end].price) && end != MAX)
+				{
+					end++;
+				}
+				return end;
+			}
+		}
+		if (start + 3 == end)
+		{
+			if (price < list[start].price)
+				return start;
+			else if (price >= list[start].price
+				&& price < list[start + 1].price)
+				return start + 1;
+			else if (price >= list[start + 1].price
+				&& price < list[start + 2].price)
+				return start + 2;
+			else if (price >= list[end - 1].price
+				&& price < list[end].price)
+				return end;
+			else
+				return end + 1;
+		}
+		else if (start + 2 == end)
+		{
+			if (price < list[start].price)
+				return start;
+			else if (price >= list[start].price
+				&& price < list[mid].price)
+				return mid;
+			else if (price >= list[mid].price
+				&& price < list[end].price)
+				return end;
+			else
+				return end + 1;
+		}
+		else if (start + 1 == end)
+		{
+			if (price < list[start].price)
+				return start;
+			else if (price >= list[start].price
+				&& price < list[end].price)
+				return end;
+			else
+				return end + 1;
+		}
+		else if (price == list[mid].price)
 			return mid;
-		else if (price < mList[mid].price)
+		else if (price < list[mid].price)
+		{
 			end = mid - 1;
-		else if (price > mList[mid].price)
+		}
+		else if (price > list[mid].price)
+		{
 			start = mid - 1;
+		}
 	}
 }
 
-void makeList(Laptop list[], vector<Laptop> mList, int type, int n)
+int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 {
+	vector<Laptop> temp;
+
 	switch (type)
 	{
 	case 0:// weight <= 1.3, 모든 cpu 타입 허용, 내장
-		for (int i = 0; i < n; i++)
+		for (int i = idx - 1; i > 0; i--)
 		{
+			if (coutidx == 5)
+				break;
 			if ((list[i].weight <= 1300) &&
 				(list[i].gpu == 0))
 			{
-				mList.push_back(list[i]);
+				coutlist[coutidx++] = list[i];
+			}
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			temp.push_back(coutlist[i]);
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			coutlist[i] = temp.back();
+			temp.pop_back();
+		}
+		for (int i = idx; i < MAX; i++)
+		{
+			if (coutidx == 7)
+				break;
+			if ((list[i].weight <= 1300) &&
+				(list[i].gpu == 0))
+			{
+				coutlist[coutidx++] = list[i];
 			}
 		}
 		break;
 	case 1:// weight <= 2.5, (3, 5, 7, 9) 허용, 내장, ssd 128 <
-		for (int i = 0; i < n; i++)
+		for (int i = idx - 1; i > 0; i--)
 		{
+			if (coutidx == 5)
+				break;
 			if ((list[i].weight <= 2500) &&
 				(list[i].gpu == 0) &&
 				(list[i].cpu.at(0) == 'i') &&
 				(list[i].ssd > 128))
 			{
-				mList.push_back(list[i]);
+				coutlist[coutidx++] = list[i];
+			}
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			temp.push_back(coutlist[i]);
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			coutlist[i] = temp.back();
+			temp.pop_back();
+		}
+		for (int i = idx; i < MAX; i++)
+		{
+			if (coutidx == 7)
+				break;
+			if ((list[i].weight <= 2500) &&
+				(list[i].gpu == 0) &&
+				(list[i].cpu.at(0) == 'i') &&
+				(list[i].ssd > 128))
+			{
+				coutlist[coutidx++] = list[i];
 			}
 		}
 		break;
 	case 2:// weight 제한없음, (7, 9) 허용, 외장, ssd 256 <
-		for (int i = 0; i < n; i++)
+		for (int i = idx - 1; i > 0; i--)
 		{
+			if (coutidx == 5)
+				break;
 			if ((list[i].gpu == 1) &&
 				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
-				mList.push_back(list[i]);
+				coutlist[coutidx++] = list[i];
+			}
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			temp.push_back(coutlist[i]);
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			coutlist[i] = temp.back();
+			temp.pop_back();
+		}
+		for (int i = idx; i < MAX; i++)
+		{
+			if (coutidx == 7)
+				break;
+			if ((list[i].gpu == 1) &&
+				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
+				(list[i].ssd > 256) && list[i].monitor > 15)
+			{
+				coutlist[coutidx++] = list[i];
 			}
 		}
 		break;
 	}
-}
 
+	return coutidx;
+}
 
 int main() {
 	// file 불러와서 리스트에 저장
-	Laptop list[969];
-	vector<Laptop> mList;
-	int n = 969;
-	int type;
-	int wishPrice;
+	Laptop list[MAX];
+	int n = MAX;
+	int type = -1;
+	int wishPrice = 0;
 
 	int move = 0; int compare = 0; // -> 자료 이동, 가격 비교 변수 
 
@@ -188,10 +325,20 @@ int main() {
 		<< "0.사무용  1.개발용   2.게이밍용\n";
 	cin >> type;
 
+	/********************정렬***********************/
+	cout << "정렬 시작" << endl;
 	heapsort(list, n);
+	cout << "정렬 끝" << endl;
 
-	// 용도로 필터링 
-	makeList(list, mList, type, n);
+	for (int i = 1; i <= 10; i++)
+	{
+		cout << list[i].price << ", ";
+	}cout << endl;
+	for (int i = MAX-11; i < MAX-1; i++)
+	{
+		cout << list[i].price << ", ";
+	}cout << endl;
+
 
 	cout << "원하시는 가격을 입력해주세요(원 단위) : ";
 	cin >> wishPrice;
@@ -203,57 +350,19 @@ int main() {
 		cin >> wishPrice;
 	}
 
+	/********************탐색***********************/
 	// 비슷한 가격대 처음 나오는 인덱스 
-	int idx = whatIndex(mList, wishPrice);
+	cout << "인덱스 서치 시작" << endl;
+	int idx = whatIndex(list, wishPrice);
+	printf("인덱스 값 : %d\n", idx);
+	cout << "인덱스 서치 끝" << endl;
 
 	Laptop coutlist[7];
 	int coutidx = 0;
-	int midx = mList.size();
-
-	switch (idx)
-	{
-	case 0:
-		for (int i = 0; i < 3; i++)
-		{
-			coutlist[coutidx++] = mList[i];
-		}break;
-	case 1:
-		for (int i = 0; i < 4; i++)
-		{
-			coutlist[coutidx++] = mList[i];
-		}break;
-	case 2:
-		for (int i = 0; i < 5; i++)
-		{
-			coutlist[coutidx++] = mList[i];
-		}break;
-	case 3:
-		for (int i = 0; i < 6; i++)
-		{
-			coutlist[coutidx++] = mList[i];
-		}break;
-	case 4:
-		for (int i = 0; i < 7; i++)
-		{
-			coutlist[coutidx++] = mList[i];
-		}break;
-	default:
-		if (midx - idx <= 1)
-		{
-			for (int i = midx - 5; i < midx; i++)
-			{
-				coutlist[coutidx++] = mList[i];
-			}
-		}
-		else
-		{
-			for (int i = idx - 5; i < idx + 2; i++)
-			{
-				coutlist[coutidx++] = mList[i];
-			}
-		}
-		break;
-	}
+	/********************필터링***********************/
+	cout << "필터링 시작" << endl;
+	coutidx = makeList(list, coutlist, type, coutidx, idx);
+	cout << "필터링 끝" << endl;
 
 	// 출력
 	cout << "            노트북 추천 리스트           " << endl;
@@ -272,8 +381,8 @@ int main() {
 
 		cout << ", monitor : " << coutlist[i].weight << "인치"
 			<< ", gpu : ";
-		if (coutlist[i].gpu == 0) cout << "내장";
-		else cout << "외장";
+		if (coutlist[i].gpu == 0) cout << "내장\n";
+		else cout << "외장\n";
 	}
 
 	return 0;
