@@ -3,7 +3,7 @@
 #define black 0 // rbtree
 #define red 1
 
-// ½ÂÇõ
+// ìŠ¹í˜
 int whatIndex_bs(Laptop list[], int price)
 {
 	int start = 0;
@@ -15,7 +15,7 @@ int whatIndex_bs(Laptop list[], int price)
 	while (start <= end)
 	{
 		i++;
-		printf("%dÈ¸Â÷ Å½»ö start=%d, end=%d\n", i, start, end);
+		printf("%díšŒì°¨ íƒìƒ‰ start=%d, end=%d\n", i, start, end);
 		int mid = (start + end) / 2;
 		if (list[start].price == list[end].price)
 		{
@@ -91,7 +91,7 @@ int whatIndex_bs(Laptop list[], int price)
 }
 
 
-// ÂùÈ£
+// ì°¬í˜¸
 int whatIndex_hash(Laptop list[], int price) {
 	int min = getMinKey(list);
 	int len = getHashLength(list);
@@ -153,7 +153,7 @@ int getMaxKey(Laptop a[]) { return a[MAX - 2].price / 100000; }
 int getHashLength(Laptop a[]) { return getMaxKey(a) - getMinKey(a) + 1; }
 
 
-// ÁöÇö
+// ì§€í˜„
 void copy(Laptop& a, Laptop& b) {
 	a.model = b.model;
 	a.price = b.price;
@@ -167,9 +167,9 @@ void copy(Laptop& a, Laptop& b) {
 
 RBtree::RBtree() {
 	Laptop null;
-	z = new node(null, -1, black, 0, 0);  // NULL³ëµå
+	z = new node(null, -1, black, 0, 0);  // NULLë…¸ë“œ
 	z->l = z; z->r = z;
-	head = new node(null, -1, black, z, z); // ½ÇÁ¦ info´Â 0ºÎÅÍ ½ÃÀÛ 
+	head = new node(null, -1, black, z, z); // ì‹¤ì œ infoëŠ” 0ë¶€í„° ì‹œì‘ 
 }
 
 void RBtree::insert(Laptop k, int info, int& compare) {
@@ -177,11 +177,11 @@ void RBtree::insert(Laptop k, int info, int& compare) {
 	while (x != z) {
 		gg = g; g = p; p = x;
 		x = (k.price < x->key.price) ? x->l : x->r; compare++;
-		if (x->l->tag && x->r->tag) split(k, compare);   // x°¡ 4³ëµå¶ó¸é split 
+		if (x->l->tag && x->r->tag) split(k, compare);   // xê°€ 4ë…¸ë“œë¼ë©´ split 
 	}
 	x = new node(k, info, red, z, z);
 	if (k.price < p->key.price) p->l = x; else p->r = x; compare++;
-	split(k, compare); head->r->tag = black; // ÀÏ´Ü ¸ğµÎ Àû¸µÅ©·Î ºÎ¿©ÇÏ°í ÇÑ¹ø ´õ split
+	split(k, compare); head->r->tag = black; // ì¼ë‹¨ ëª¨ë‘ ì ë§í¬ë¡œ ë¶€ì—¬í•˜ê³  í•œë²ˆ ë” split
 }
 
 /*
@@ -209,8 +209,8 @@ void RBtree::split(Laptop k, int& compare) {
 }
 
 int RBtree::search(int price, int& compare) {
-	// °ª Áßº¹µÇ´Â°æ¿ì 
-		// Ã£´Â °¡°İÀÇ ±İ¾×´ë°¡ ¾È³ª¿Ã°æ¿ì 
+	// ê°’ ì¤‘ë³µë˜ëŠ”ê²½ìš° 
+		// ì°¾ëŠ” ê°€ê²©ì˜ ê¸ˆì•¡ëŒ€ê°€ ì•ˆë‚˜ì˜¬ê²½ìš° 
 	struct node* x = head->r;
 	z->key.price = price;
 	while (x->r != z && x->l != z) {
@@ -223,15 +223,16 @@ int RBtree::search(int price, int& compare) {
 		}
 	}
 	compare++;
-	if (x->l == z && x->r == z) { // ÀÚ½Ä³ëµå ¾ø´Â °æ¿ì  
+	if (x->l == z && x->r == z) { // ìì‹ë…¸ë“œ ì—†ëŠ” ê²½ìš°  
 		if (price == x->key.price) {
 			return x->Info;
 		}
 		else {
-			return x->Info + 1;
+			if (price < x->key.price) return x->Info;
+			else return x->Info + 1;
 		}
 	}
-	else if (x->l != NULL) { // ¿ŞÂÊ ÀÚ½Ä¸¸ ÀÖ´Â °æ¿ì
+	else if (x->l != z) { // ì™¼ìª½ ìì‹ë§Œ ìˆëŠ” ê²½ìš°
 		if (price == x->key.price) {
 			return x->Info;
 		}
@@ -239,7 +240,7 @@ int RBtree::search(int price, int& compare) {
 		else return x->Info + 1;
 
 	}
-	else {	// ¿À¸¥ÂÊ ÀÚ½Ä¸¸ ÀÖ´Â °æ¿ì 
+	else {	// ì˜¤ë¥¸ìª½ ìì‹ë§Œ ìˆëŠ” ê²½ìš° 
 		if (price == x->key.price) {
 			return x->Info;
 		}
@@ -249,8 +250,9 @@ int RBtree::search(int price, int& compare) {
 }
 
 int whatIndex_rb(Laptop list[], int price) {
-	// ÈæÀû³ª¹«
-	// Å½»ö ¾Ë°í¸®ÁòÀ¸·Î ÀÔ·ÂµÈ ±İ¾×º¸´Ù ³ôÀº °¡°İÀÌ ³ª¿À´Â Ã¹ index
+	// í‘ì ë‚˜ë¬´
+	// íƒìƒ‰ ì•Œê³ ë¦¬ì¦˜ìœ¼ë¡œ ì…ë ¥ëœ ê¸ˆì•¡ë³´ë‹¤ ë†’ì€ ê°€ê²©ì´ ë‚˜ì˜¤ëŠ” ì²« index
+	int compare = 0;
 	int info = 0;
 	RBtree T;
 	for (int i = 0; i < MAX - 1; i++) {
