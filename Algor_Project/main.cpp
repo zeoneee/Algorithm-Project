@@ -40,8 +40,8 @@ void makeLaptopArr(Laptop list[], string fileName) {
 			else if (position == 5) list[aggIdx].weight = stoi(str);
 			else if (position == 6) list[aggIdx].monitor = stod(str);
 			else if (position == 7) {
-				if (str == "³»Àå") list[aggIdx].gpu = 0;
-				else if (str == "¿ÜÀå") list[aggIdx].gpu = 1;
+				if (str == "ë‚´ì¥") list[aggIdx].gpu = 0;
+				else if (str == "ì™¸ì¥") list[aggIdx].gpu = 1;
 			}
 			position++;
 		}
@@ -68,7 +68,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 
 	switch (type)
 	{
-	case 0:// weight <= 1.3, ¸ğµç cpu Å¸ÀÔ Çã¿ë, ³»Àå
+	case 0:// weight <= 1.3, ëª¨ë“  cpu íƒ€ì… í—ˆìš©, ë‚´ì¥
 		for (int i = idx - 1; i >= 0; i--)
 		{
 			if (coutidx == 5)
@@ -99,7 +99,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			}
 		}
 		break;
-	case 1:// weight <= 2.5, (3, 5, 7, 9) Çã¿ë, ³»Àå, ssd 128 <
+	case 1:// weight <= 2.5, (3, 5, 7, 9) í—ˆìš©, ë‚´ì¥, ssd 128 <
 		for (int i = idx - 1; i >= 0; i--)
 		{
 			if (coutidx == 5)
@@ -134,13 +134,13 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			}
 		}
 		break;
-	case 2:// weight Á¦ÇÑ¾øÀ½, (7, 9) Çã¿ë, ¿ÜÀå, ssd 256 <
+	case 2:// weight ì œí•œì—†ìŒ, (7, 9) í—ˆìš©, ì™¸ì¥, ssd 256 <
 		for (int i = idx - 1; i >= 0; i--)
 		{
 			if (coutidx == 5)
 				break;
 			if ((list[i].gpu == 1) &&
-				(list[i].cpu == "i7-11¼¼´ë" || list[i].cpu == "i9-11¼¼´ë") &&
+				(list[i].cpu == "i7-11ì„¸ëŒ€" || list[i].cpu == "i9-11ì„¸ëŒ€") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
 				coutlist[coutidx++] = list[i];
@@ -160,7 +160,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			if (coutidx == 7)
 				break;
 			if ((list[i].gpu == 1) &&
-				(list[i].cpu == "i7-11¼¼´ë" || list[i].cpu == "i9-11¼¼´ë") &&
+				(list[i].cpu == "i7-11ì„¸ëŒ€" || list[i].cpu == "i9-11ì„¸ëŒ€") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
 				coutlist[coutidx++] = list[i];
@@ -173,7 +173,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 }
 
 void print(Laptop coutlist[], int coutidx) {
-	cout << "            ³ëÆ®ºÏ ÃßÃµ ¸®½ºÆ®           " << endl;
+	cout << "            ë…¸íŠ¸ë¶ ì¶”ì²œ ë¦¬ìŠ¤íŠ¸           " << endl;
 	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < coutidx; i++) {
 		cout << "model : " << coutlist[i].model
@@ -187,16 +187,16 @@ void print(Laptop coutlist[], int coutidx) {
 		if (coutlist[i].weight >= 1000) cout << ", weight : " << coutlist[i].weight << "g";
 		else cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
 
-		cout << ", monitor : " << coutlist[i].weight << "ÀÎÄ¡"
+		cout << ", monitor : " << coutlist[i].weight << "ì¸ì¹˜"
 			<< ", gpu : ";
-		if (coutlist[i].gpu == 0) cout << "³»Àå\n";
-		else cout << "¿ÜÀå\n";
+		if (coutlist[i].gpu == 0) cout << "ë‚´ì¥\n";
+		else cout << "ì™¸ì¥\n";
 	}
 	cout << endl;
 }
 
 int main() {
-	// file ºÒ·¯¿Í¼­ ¸®½ºÆ®¿¡ ÀúÀå
+	// file ë¶ˆëŸ¬ì™€ì„œ ë¦¬ìŠ¤íŠ¸ì— ì €ì¥
 	Laptop list1[MAX];
 	Laptop list2[MAX];
 	Laptop list3[MAX];
@@ -212,18 +212,18 @@ int main() {
 	double hashsearch;
 	double rbsearch;
 	
-	double heapsort;
-	double quicksort;
-	double mergesort;
+	double heapsort_t;
+	double quicksort_t;
+	double mergesort_t;
 
 	int coutidx1 = 0, coutidx2 = 0, coutidx3 = 0;
 	int idx1, idx2, idx3;
 
 	int type = -1;
 	int wishPrice = 0;
-	int move = 0; int compare = 0; // -> ÀÚ·á ÀÌµ¿, °¡°İ ºñ±³ º¯¼ö 
+	int move = 0; int compare = 0; // -> ìë£Œ ì´ë™, ê°€ê²© ë¹„êµ ë³€ìˆ˜ 
 
-	//Laptop list ¸¸µé±â
+	//Laptop list ë§Œë“¤ê¸°
 
 	makeLaptopArr(list1, "Real_Data_For_Project_Laptop_ver_2.csv");
 	makeLaptopArr(list2, "Real_Data_For_Project_Laptop_ver_2.csv");
@@ -231,40 +231,40 @@ int main() {
 	
 
 
-	// ¿ëµµ¿Í ¼±È£ °¡°İ ÀÔ·Â¹Ş±â 
-	cout << "¿øÇÏ½Ã´Â ³ëÆ®ºÏ Å¸ÀÔÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä.\n"
-		<< "0.»ç¹«¿ë  1.°³¹ß¿ë   2.°ÔÀÌ¹Ö¿ë\n";
+	// ìš©ë„ì™€ ì„ í˜¸ ê°€ê²© ì…ë ¥ë°›ê¸° 
+	cout << "ì›í•˜ì‹œëŠ” ë…¸íŠ¸ë¶ íƒ€ì…ì„ ì…ë ¥í•´ì£¼ì„¸ìš”.\n"
+		<< "0.ì‚¬ë¬´ìš©  1.ê°œë°œìš©   2.ê²Œì´ë°ìš©\n";
 	cin >> type;
 
-	/********************Á¤·Ä***********************/
+	/********************ì •ë ¬***********************/
 	
 	start = clock();
 	heapsort(list1, MAX - 1);
 	end = clock();
-	heapsort = (double)(end - start);
+	heapsort_t = (double)(end - start);
 
 	start = clock();
 	quicksort(list2, 0, MAX - 2);
 	end = clock();
-	quicksort = (double)(end - start);
+	quicksort_t = (double)(end - start);
 
 	start = clock();
     mergesort(list3, 0, MAX - 2, compare, move);
 	end = clock();
-	mergesort = (double)(end - start);
+	mergesort_t = (double)(end - start);
 
-	cout << "¿øÇÏ½Ã´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+	cout << "ì›í•˜ì‹œëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : ";
 	cin >> wishPrice;
 
-	// ³Ê¹« ³·Àº ±İ¾× (Ãâ·ÂÇÒ ³ëÆ®ºÏÀÌ ¾øÀ» °æ¿ì) ¿¹¿Ü Ã³¸®
+	// ë„ˆë¬´ ë‚®ì€ ê¸ˆì•¡ (ì¶œë ¥í•  ë…¸íŠ¸ë¶ì´ ì—†ì„ ê²½ìš°) ì˜ˆì™¸ ì²˜ë¦¬
 	while (wishPrice < 273260) {
-		cout << "ÀÔ·ÂÇÏ½Å ±İ¾×ÀÌ ³Ê¹« ³·¾Æ ±İ¾×¿¡ ¸Â´Â ³ëÆ®ºÏÀÌ ¾ø½À´Ï´Ù.\n´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.\n";
-		cout << "¿øÇÏ½Ã´Â °¡°İÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä(¿ø ´ÜÀ§) : ";
+		cout << "ì…ë ¥í•˜ì‹  ê¸ˆì•¡ì´ ë„ˆë¬´ ë‚®ì•„ ê¸ˆì•¡ì— ë§ëŠ” ë…¸íŠ¸ë¶ì´ ì—†ìŠµë‹ˆë‹¤.\në‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”.\n";
+		cout << "ì›í•˜ì‹œëŠ” ê°€ê²©ì„ ì…ë ¥í•´ì£¼ì„¸ìš”(ì› ë‹¨ìœ„) : ";
 		cin >> wishPrice;
 	}
 
-	/********************Å½»ö***********************/
-	// ºñ½ÁÇÑ °¡°İ´ë Ã³À½ ³ª¿À´Â ÀÎµ¦½º 
+	/********************íƒìƒ‰***********************/
+	// ë¹„ìŠ·í•œ ê°€ê²©ëŒ€ ì²˜ìŒ ë‚˜ì˜¤ëŠ” ì¸ë±ìŠ¤ 
 	start = clock();
 	idx1 = whatIndex_bs(list1, wishPrice);
 	end = clock();
@@ -281,19 +281,22 @@ int main() {
 	rbsearch = (double)(end - start);
 
 	
-	/********************ÇÊÅÍ¸µ***********************/
+	/********************í•„í„°ë§***********************/
 	coutidx1 = makeList(list1, coutlist1, type, coutidx1, idx1);
 	coutidx2 = makeList(list2, coutlist2, type, coutidx2, idx2);
 	coutidx3 = makeList(list3, coutlist3, type, coutidx3, idx3);
 
-	// Ãâ·Â
+	// ì¶œë ¥
 	print(coutlist1, coutidx1);
 	print(coutlist2, coutidx2);
 	print(coutlist3, coutidx3);
 
-	cout << "°¡°İ ¼ø Á¤·Ä ½Ã°£" << endl;
-	cout << heapsort << "(heap), " << quicksort << "(quick), " << mergesort << "(merge)" << endl;
-	cout << " °¡°İ Å½»ö ½Ã°£" << endl;
+	cout << "ê°€ê²© ìˆœ ì •ë ¬ ì‹œê°„" << endl;
+	cout << heapsort_t << "(heap), " << quicksort_t << "(quick), " << mergesort_t << "(merge)" << endl;
+	cout << " ê°€ê²© íƒìƒ‰ ì‹œê°„" << endl;
 	cout << bssearch << "(binary search), " << hashsearch << "(hash), " << rbsearch << "(red-black)" << endl;
+	cout << endl;
+	cout << "ê°€ê²© ìˆœ ì •ë ¬ ë¹„êµ íšŸìˆ˜ " << endl;
+	cout << "ê°€ê²© íƒìƒ‰ ë¹„êµ íšŸìˆ˜ " << endl;
 	return 0;
 }
