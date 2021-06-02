@@ -106,11 +106,13 @@ public:
 		}
 
 		while (cursor->laptop.price == 0 || 
-			(cursor->next != NULL
-			&& abs(cursor->laptop.price - price) > abs(cursor->next->laptop.price - price)))
+			(cursor->next != NULL && cursor->laptop.price < price))
 			cursor = cursor->next;
 
-		return cursor->originIdx;
+		if (cursor->next == NULL && cursor->laptop.price < price)
+			return cursor->originIdx + 1;
+		else
+			return cursor->originIdx;
 
 	}
 };
@@ -172,46 +174,116 @@ int whatIndex(Laptop list[], int price)
 	return ht.find(price);
 }
 
-void makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
+int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 {
+	vector<Laptop> temp;
+
 	switch (type)
 	{
 	case 0:// weight <= 1.3, 모든 cpu 타입 허용, 내장
-		while (coutidx < 5)
+		for (int i = idx - 1; i > 0; i--)
 		{
-			for (int i = idx; i > 0; i--)
+			if (coutidx == 5)
+				break;
+			if ((list[i].weight <= 1300) &&
+				(list[i].gpu == 0))
 			{
-				if ((list[i].weight <= 1300) &&
-					(list[i].gpu == 0))
-				{
-					coutlist[coutidx++] = list[i];
-				}
+				coutlist[coutidx++] = list[i];
+			}
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			temp.push_back(coutlist[i]);
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			coutlist[i] = temp.back();
+			temp.pop_back();
+		}
+		for (int i = idx; i < MAX; i++)
+		{
+			if (coutidx == 7)
+				break;
+			if ((list[i].weight <= 1300) &&
+				(list[i].gpu == 0))
+			{
+				coutlist[coutidx++] = list[i];
 			}
 		}
 		break;
 	case 1:// weight <= 2.5, (3, 5, 7, 9) 허용, 내장, ssd 128 <
-		for (int i = 0; i < MAX - 1; i++)
+		for (int i = idx - 1; i > 0; i--)
 		{
+			if (coutidx == 5)
+				break;
 			if ((list[i].weight <= 2500) &&
 				(list[i].gpu == 0) &&
 				(list[i].cpu.at(0) == 'i') &&
 				(list[i].ssd > 128))
 			{
+				coutlist[coutidx++] = list[i];
+			}
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			temp.push_back(coutlist[i]);
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			coutlist[i] = temp.back();
+			temp.pop_back();
+		}
+		for (int i = idx; i < MAX; i++)
+		{
+			if (coutidx == 7)
+				break;
+			if ((list[i].weight <= 2500) &&
+				(list[i].gpu == 0) &&
+				(list[i].cpu.at(0) == 'i') &&
+				(list[i].ssd > 128))
+			{
+				coutlist[coutidx++] = list[i];
 			}
 		}
 		break;
 	case 2:// weight 제한없음, (7, 9) 허용, 외장, ssd 256 <
-		for (int i = 0; i < MAX - 1; i++)
+		for (int i = idx - 1; i > 0; i--)
 		{
+			if (coutidx == 5)
+				break;
 			if ((list[i].gpu == 1) &&
 				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
+				coutlist[coutidx++] = list[i];
+			}
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			temp.push_back(coutlist[i]);
+		}
+		for (int i = 0; i < coutidx; i++)
+		{
+			coutlist[i] = temp.back();
+			temp.pop_back();
+		}
+		for (int i = idx; i < MAX; i++)
+		{
+			if (coutidx == 7)
+				break;
+			if ((list[i].gpu == 1) &&
+				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
+				(list[i].ssd > 256) && list[i].monitor > 15)
+			{
+				coutlist[coutidx++] = list[i];
 			}
 		}
 		break;
 	}
+
+	return coutidx;
 }
+
 // For quick sort
 inline void swap(Laptop a[], int i, int j)
 {
@@ -270,7 +342,7 @@ int main() {
 	Laptop coutlist[7];
 	int coutidx = 0;
 	/********************필터링***********************/
-	makeList(list, coutlist, type, coutidx, idx);
+	coutidx = makeList(list, coutlist, type, coutidx, idx);
 
 	// 출력
 	cout << "            노트북 추천 리스트           " << endl;
@@ -289,8 +361,8 @@ int main() {
 
 		cout << ", monitor : " << coutlist[i].weight << "인치"
 			<< ", gpu : ";
-		if (coutlist[i].gpu == 0) cout << "내장";
-		else cout << "외장";
+		if (coutlist[i].gpu == 0) cout << "내장\n";
+		else cout << "외장\n";
 	}
 
 	return 0;
