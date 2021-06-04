@@ -112,18 +112,15 @@ void makeLaptopArr(Laptop list[], string fileName) {
 
 int whatIndex(Laptop list[], int price)
 {
-	int start = 1;
-	int end = MAX - 1;
+	int start = 0;
+	int end = MAX - 2;
 	int i = 0;
-	int pstart = 1;
-	int pend = MAX - 1;
 
 	if (price > list[end].price)
 		return end;
 	while (start <= end)
 	{
 		i++;
-		printf("%d회차 탐색 start=%d, end=%d\n", i, start, end);
 		int mid = (start + end) / 2;
 		if (list[start].price == list[end].price)
 		{
@@ -185,7 +182,7 @@ int whatIndex(Laptop list[], int price)
 			else
 				return end + 1;
 		}
-		else if (price == list[mid].price)
+		if (price == list[mid].price)
 			return mid;
 		else if (price < list[mid].price)
 		{
@@ -205,7 +202,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 	switch (type)
 	{
 	case 0:// weight <= 1.3, 모든 cpu 타입 허용, 내장
-		for (int i = idx - 1; i > 0; i--)
+		for (int i = idx - 1; i >= 0; i--)
 		{
 			if (coutidx == 5)
 				break;
@@ -224,7 +221,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			coutlist[i] = temp.back();
 			temp.pop_back();
 		}
-		for (int i = idx; i < MAX; i++)
+		for (int i = idx; i < MAX-1; i++)
 		{
 			if (coutidx == 7)
 				break;
@@ -236,7 +233,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 		}
 		break;
 	case 1:// weight <= 2.5, (3, 5, 7, 9) 허용, 내장, ssd 128 <
-		for (int i = idx - 1; i > 0; i--)
+		for (int i = idx - 1; i >= 0; i--)
 		{
 			if (coutidx == 5)
 				break;
@@ -257,7 +254,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			coutlist[i] = temp.back();
 			temp.pop_back();
 		}
-		for (int i = idx; i < MAX; i++)
+		for (int i = idx; i < MAX-1; i++)
 		{
 			if (coutidx == 7)
 				break;
@@ -271,7 +268,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 		}
 		break;
 	case 2:// weight 제한없음, (7, 9) 허용, 외장, ssd 256 <
-		for (int i = idx - 1; i > 0; i--)
+		for (int i = idx - 1; i >= 0; i--)
 		{
 			if (coutidx == 5)
 				break;
@@ -291,7 +288,7 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			coutlist[i] = temp.back();
 			temp.pop_back();
 		}
-		for (int i = idx; i < MAX; i++)
+		for (int i = idx; i < MAX-1; i++)
 		{
 			if (coutidx == 7)
 				break;
@@ -326,7 +323,17 @@ int main() {
 	cin >> type;
 
 	/********************정렬***********************/
-	heapsort(list, n);
+	heapsort(list, n-1);
+
+	for (int i = 0; i < 10; i++)
+	{
+		cout << list[i].price << ", ";
+	}cout << endl;
+	for (int i = MAX-11; i < MAX-1; i++)
+	{
+		cout << list[i].price << ", ";
+	}cout << endl;
+
 
 	cout << "원하시는 가격을 입력해주세요(원 단위) : ";
 	cin >> wishPrice;
@@ -341,15 +348,34 @@ int main() {
 	/********************탐색***********************/
 	// 비슷한 가격대 처음 나오는 인덱스 
 	int idx = whatIndex(list, wishPrice);
-	printf("인덱스 값 : %d\n", idx);
+	cout << idx << endl;
+	for (int i = idx - 1; i < idx + 2; i++)
+	{
+		cout << "model : " << list[i].model
+			<< ", price : " << list[i].price
+			<< ", cpu : " << list[i].cpu
+			<< ", ram : " << list[i].ram << "gb";
+
+		if (list[i].ssd >= 1000) cout << ", ssd : " << list[i].ssd << "tb";
+		else cout << ", ssd : " << list[i].ssd << "gb";
+
+		if (list[i].weight >= 1000) cout << ", weight : " << (double)(list[i].weight) / 1000 << "kg ";
+		else cout << ", weight : " << list[i].weight << "g";
+
+		cout << ", monitor : " << list[i].monitor << "인치"
+			<< ", gpu : ";
+		if (list[i].gpu == 0) cout << "내장\n";
+		else cout << "외장\n";
+	}
 
 	Laptop coutlist[7];
 	int coutidx = 0;
 	/********************필터링***********************/
 	coutidx = makeList(list, coutlist, type, coutidx, idx);
 
-	// 출력
-	cout << "            노트북 추천 리스트           " << endl;
+	// 
+	cout << "-----------------------------------------" << endl;
+	cout << "              노트북 추천 리스트           " << endl;
 	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < coutidx; i++) {
 		cout << "model : " << coutlist[i].model
@@ -360,10 +386,10 @@ int main() {
 		if (coutlist[i].ssd >= 1000) cout << ", ssd : " << coutlist[i].ssd << "tb";
 		else cout << ", ssd : " << coutlist[i].ssd << "gb";
 
-		if (coutlist[i].weight >= 1000) cout << ", weight : " << coutlist[i].weight << "g";
-		else cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
+		if (coutlist[i].weight >= 1000) cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
+		else cout << ", weight : " << coutlist[i].weight << "g";
 
-		cout << ", monitor : " << coutlist[i].weight << "인치"
+		cout << ", monitor : " << coutlist[i].monitor << "인치"
 			<< ", gpu : ";
 		if (coutlist[i].gpu == 0) cout << "내장\n";
 		else cout << "외장\n";
