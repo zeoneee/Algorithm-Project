@@ -129,21 +129,23 @@ void HashTable::add(Laptop laptop, int idx) {
 
 int HashTable::find(int price) {
 	int findKey = price / 100000;
-	HashNode* cursor = NULL;
+		HashNode* cursor = NULL;
 
-	for (int i = 0; i < size; i++) {
-		if (nodelist[i].priceKey == findKey) {
-			cursor = &nodelist[i];
-			break;
+		for (int i = 0; i < size; i++) {
+			if (nodelist[i].priceKey == findKey) {
+				cursor = &nodelist[i];
+				break;
+			}
 		}
-	}
 
-	while (cursor->laptop.price == 0 ||
-		(cursor->next != NULL
-			&& abs(cursor->laptop.price - price) > abs(cursor->next->laptop.price - price)))
-		cursor = cursor->next;
+		while (cursor->laptop.price == 0 || 
+			(cursor->next != NULL && cursor->laptop.price < price))
+			cursor = cursor->next;
 
-	return cursor->originIdx;
+		if (cursor->next == NULL && cursor->laptop.price < price)
+			return cursor->originIdx + 1;
+		else
+			return cursor->originIdx;
 
 }
 
