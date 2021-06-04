@@ -62,6 +62,7 @@ void copy(Laptop& a, Laptop& b) {
 	a.monitor = b.monitor;
 }
 
+
 int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 {
 	vector<Laptop> temp;
@@ -76,12 +77,9 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 			if ((list[i].weight <= 1300) &&
 				(list[i].gpu == 0))
 			{
-				coutlist[coutidx++] = list[i];
+				temp.push_back(list[i]);
+				coutidx++;
 			}
-		}
-		for (int i = 0; i < coutidx; i++)
-		{
-			temp.push_back(coutlist[i]);
 		}
 		for (int i = 0; i < coutidx; i++)
 		{
@@ -109,12 +107,9 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 				(list[i].cpu.at(0) == 'i') &&
 				(list[i].ssd > 128))
 			{
-				coutlist[coutidx++] = list[i];
+				temp.push_back(list[i]);
+				coutidx++;
 			}
-		}
-		for (int i = 0; i < coutidx; i++)
-		{
-			temp.push_back(coutlist[i]);
 		}
 		for (int i = 0; i < coutidx; i++)
 		{
@@ -143,12 +138,9 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 				(list[i].cpu == "i7-11세대" || list[i].cpu == "i9-11세대") &&
 				(list[i].ssd > 256) && list[i].monitor > 15)
 			{
-				coutlist[coutidx++] = list[i];
+				temp.push_back(list[i]);
+				coutidx++;
 			}
-		}
-		for (int i = 0; i < coutidx; i++)
-		{
-			temp.push_back(coutlist[i]);
 		}
 		for (int i = 0; i < coutidx; i++)
 		{
@@ -173,7 +165,8 @@ int makeList(Laptop list[], Laptop coutlist[], int type, int coutidx, int idx)
 }
 
 void print(Laptop coutlist[], int coutidx) {
-	cout << "            노트북 추천 리스트           " << endl;
+	cout << "-----------------------------------------" << endl;
+	cout << "              노트북 추천 리스트           " << endl;
 	cout << "-----------------------------------------" << endl;
 	for (int i = 0; i < coutidx; i++) {
 		cout << "model : " << coutlist[i].model
@@ -184,10 +177,10 @@ void print(Laptop coutlist[], int coutidx) {
 		if (coutlist[i].ssd >= 1000) cout << ", ssd : " << coutlist[i].ssd << "tb";
 		else cout << ", ssd : " << coutlist[i].ssd << "gb";
 
-		if (coutlist[i].weight >= 1000) cout << ", weight : " << coutlist[i].weight << "g";
-		else cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
+		if (coutlist[i].weight >= 1000) cout << ", weight : " << (double)(coutlist[i].weight) / 1000 << "kg ";
+		else cout << ", weight : " << coutlist[i].weight << "g";
 
-		cout << ", monitor : " << coutlist[i].weight << "인치"
+		cout << ", monitor : " << coutlist[i].monitor << "인치"
 			<< ", gpu : ";
 		if (coutlist[i].gpu == 0) cout << "내장\n";
 		else cout << "외장\n";
