@@ -4,7 +4,7 @@
 #define red 1
 
 // 승혁
-int whatIndex(Laptop list[], int price)
+int whatIndex_bs(Laptop list[], int price)
 {
 	int start = 0;
 	int end = MAX - 2;
