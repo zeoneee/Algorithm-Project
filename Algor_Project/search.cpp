@@ -4,7 +4,7 @@
 #define red 1
 
 // 승혁
-int whatIndex_bs(Laptop list[], int price)
+int whatIndex(Laptop list[], int price)
 {
 	int start = 0;
 	int end = MAX - 2;
@@ -15,7 +15,6 @@ int whatIndex_bs(Laptop list[], int price)
 	while (start <= end)
 	{
 		i++;
-		printf("%d회차 탐색 start=%d, end=%d\n", i, start, end);
 		int mid = (start + end) / 2;
 		if (list[start].price == list[end].price)
 		{
@@ -77,8 +76,8 @@ int whatIndex_bs(Laptop list[], int price)
 			else
 				return end + 1;
 		}
-		else if (price == list[mid].price)
-			return mid;
+		if (price == list[mid].price)
+			return mid + 1;
 		else if (price < list[mid].price)
 		{
 			end = mid - 1;
