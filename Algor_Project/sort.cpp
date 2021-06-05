@@ -5,7 +5,11 @@ Laptop* sorted = new Laptop[2000]; // merge
 // ½ÂÇõ
 void swap(Laptop a[], int i, int j) {
 	Laptop temp;
-	temp = a[j]; a[j] = a[i]; a[i] = temp;
+	temp = a[j];
+	// move++;
+	a[j] = a[i];
+	// move++;
+	a[i] = temp;
 }
 
 void MakeHeap(Laptop a[], int Root, int LastNode) {
@@ -13,8 +17,11 @@ void MakeHeap(Laptop a[], int Root, int LastNode) {
 	Parent = Root;
 	RootValue = a[Root];
 	LeftSon = 2 * Parent + 1;
+	//move++;
 	RightSon = LeftSon + 1;
+	//move++;
 	while (LeftSon < LastNode) {
+		//comp++;
 		if (RightSon <= LastNode && a[LeftSon].price < a[RightSon].price) {
 			Son = RightSon;
 		}
@@ -23,20 +30,31 @@ void MakeHeap(Laptop a[], int Root, int LastNode) {
 			Son = LeftSon;
 		}
 		if (RootValue.price < a[Son].price) {
+			//move++;
 			a[Parent] = a[Son];
 			Parent = Son;
 			LeftSon = Parent * 2 + 1;
 			RightSon = LeftSon + 1;
 		}
 		else break;
+		//comp++;
 	}
 	a[Parent] = RootValue;
 }
 
 void heapsort(Laptop a[], int N) {
 	int i;
-	for (i = N / 2; i >= 1; i--) { MakeHeap(a, i - 1, N - 1); }
-	for (i = N - 1; i >= 1; i--) { swap(a, 0, i); MakeHeap(a, 0, i - 1); }
+	for (i = N / 2; i >= 1; i--)
+	{
+		MakeHeap(a, i - 1, N - 1);
+	}
+	for (i = N - 1; i >= 1; i--)
+	{
+		//comp++;
+		//move++;
+		swap(a, 0, i);
+		MakeHeap(a, 0, i - 1);
+	}
 }
 
 // ÂùÈ£
