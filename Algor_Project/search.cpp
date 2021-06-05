@@ -116,11 +116,12 @@ void HashTable::add(Laptop laptop, int idx) {
 	tempNode->laptop = laptop;
 
 	for (int i = 0; i < size; i++) {
+		//compare++;
 		if (nodelist[i].priceKey == tempNode->priceKey) {
+			//compare++;
 			cursor = &nodelist[i];
 			while (cursor->next != NULL)
 				cursor = cursor->next;
-
 			cursor->next = tempNode;
 			break;
 		}
@@ -132,6 +133,7 @@ int HashTable::find(int price) {
 		HashNode* cursor = NULL;
 
 		for (int i = 0; i < size; i++) {
+			//compare++;
 			if (nodelist[i].priceKey == findKey) {
 				cursor = &nodelist[i];
 				break;
@@ -139,9 +141,11 @@ int HashTable::find(int price) {
 		}
 
 		while (cursor->laptop.price == 0 || 
-			(cursor->next != NULL && cursor->laptop.price < price))
+			(cursor->next != NULL && cursor->laptop.price < price)){
+			//compare++;
 			cursor = cursor->next;
-
+		}
+		//compare++;
 		if (cursor->next == NULL && cursor->laptop.price < price)
 			return cursor->originIdx + 1;
 		else
