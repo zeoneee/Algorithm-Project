@@ -14,6 +14,7 @@ int whatIndex_bs(Laptop list[], int price)
 		return end;
 	while (start <= end)
 	{
+		// compare++;
 		i++;
 		int mid = (start + end) / 2;
 		if (list[start].price == list[end].price)
