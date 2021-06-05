@@ -2,7 +2,7 @@
 
 Laptop* sorted = new Laptop[2000]; // merge
 
-// ½ÂÇõ
+// Â½Ã‚Ã‡Ãµ
 void swap(Laptop a[], int i, int j) {
 	Laptop temp;
 	temp = a[j]; a[j] = a[i]; a[i] = temp;
@@ -39,10 +39,11 @@ void heapsort(Laptop a[], int N) {
 	for (i = N - 1; i >= 1; i--) { swap(a, 0, i); MakeHeap(a, 0, i - 1); }
 }
 
-// ÂùÈ£
+// Ã‚Ã¹ÃˆÂ£
 // For quick sort
 inline void swap(Laptop a[], int i, int j)
 {
+	//move += 3;
 	Laptop t = a[i];
 	a[i] = a[j];
 	a[j] = t;
@@ -57,8 +58,14 @@ void quicksort(Laptop a[], int l, int r)
 	int j = r;
 	int temp;
 	while (i <= j) {
-		while (i <= r && a[i].price <= a[pivot].price) i++;
-		while (j > l && a[j].price >= a[pivot].price) j--;
+		while (i <= r && a[i].price <= a[pivot].price) {
+			i++; 
+			//compare++;
+		}
+		while (j > l && a[j].price >= a[pivot].price) {
+			j--;
+			//compare++;
+		}
 		if (i >= j) break;
 		swap(a, i, j);
 	}
@@ -67,7 +74,7 @@ void quicksort(Laptop a[], int l, int r)
 	quicksort(a, j + 1, r);
 }
 
-// ÁöÇö
+// ÃÃ¶Ã‡Ã¶
 void copy(Laptop& a, Laptop& b) {
 	a.model = b.model;
 	a.price = b.price;
@@ -79,7 +86,7 @@ void copy(Laptop& a, Laptop& b) {
 	a.monitor = b.monitor;
 }
 
-// °¡°İ Á¤·Ä
+// Â°Â¡Â°Ã ÃÂ¤Â·Ã„
 void merge(Laptop* a, int l, int mid, int r, int& compare, int& move) {
 	int i, j, k, n;
 	i = l; j = mid + 1; k = l;
